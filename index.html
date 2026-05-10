@@ -265,7 +265,7 @@
 <script>
 const ACCESS_CODE = 'delegate2024';
 const API_URL = 'https://api.anthropic.com/v1/messages';
-const API_KEY = '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';
+const API_KEY = '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';
 
 // ── STATE ──
 let userName = '';
@@ -698,6 +698,7 @@ async function getAIResponse() {
   try {
     const resp = await fetch(API_URL, {
       method: 'POST',
+      mode: 'cors',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': API_KEY,

@@ -712,6 +712,12 @@ async function getAIResponse() {
       })
     });
     const data = await resp.json();
+    if (data.error) {
+      hideTyping();
+      addMessage('ai', `API error: ${data.error.message}`);
+      document.getElementById('btn-send').disabled = false;
+      return;
+    }
     const reply = data.content?.[0]?.text || 'I had trouble responding. Please try again.';
     hideTyping();
     addMessage('ai', reply);

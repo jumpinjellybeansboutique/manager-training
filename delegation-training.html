@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delegation Mastery — Manager Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --bg-card: #FFFFFF;
+    --text: #1A1814;
+    --text-muted: #6B6660;
+    --accent: #2D5A3D;
+    --accent-light: #EAF2ED;
+    --accent-mid: #4A8A60;
+    --amber: #C17B2A;
+    --amber-light: #FBF3E8;
+    --red-light: #FBF0EF;
+    --red: #B94040;
+    --border: #E2DDD6;
+    --shadow: 0 2px 12px rgba(26,24,20,0.07);
+    --radius: 12px;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 16px; line-height: 1.6; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* LOGIN */
+  #screen-login { align-items: center; justify-content: center; padding: 2rem; }
+  .login-box { background: var(--bg-card); border-radius: 20px; padding: 3rem 2.5rem; max-width: 420px; width: 100%; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .login-logo { font-family: var(--font-display); font-size: 28px; color: var(--accent); margin-bottom: 0.25rem; }
+  .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 2rem; }
+  .login-box label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .login-box input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 15px; background: var(--bg); color: var(--text); outline: none; margin-bottom: 1rem; }
+  .login-box input:focus { border-color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 11px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--accent-mid); }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* TOP NAV */
+  .topnav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; flex-shrink: 0; }
+  .topnav-logo { font-family: var(--font-display); font-size: 20px; color: var(--accent); }
+  .topnav-user { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .btn-logout { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--text-muted); cursor: pointer; font-family: var(--font-body); }
+  .btn-logout:hover { background: var(--bg); }
+
+  /* DASHBOARD */
+  #screen-dashboard { flex-direction: column; }
+  .dash-body { flex: 1; max-width: 820px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
+  .dash-welcome { font-family: var(--font-display); font-size: 30px; color: var(--text); margin-bottom: 0.25rem; }
+  .dash-welcome em { color: var(--accent); font-style: italic; }
+  .dash-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; }
+  .progress-bar-wrap { background: var(--border); border-radius: 99px; height: 6px; margin-bottom: 0.5rem; }
+  .progress-bar-fill { background: var(--accent); height: 6px; border-radius: 99px; transition: width 0.5s ease; }
+  .progress-label { font-size: 12px; color: var(--text-muted); margin-bottom: 2rem; }
+  .module-list { display: flex; flex-direction: column; gap: 12px; }
+  .mod-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
+  .mod-row:hover:not(.locked) { box-shadow: var(--shadow); border-color: var(--accent); }
+  .mod-row.locked { cursor: default; opacity: 0.55; }
+  .mod-row.completed { border-color: var(--accent); background: var(--accent-light); }
+  .mod-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .mod-icon.done { background: var(--accent); color: #fff; }
+  .mod-icon.active { background: var(--accent-light); color: var(--accent); }
+  .mod-icon.locked-i { background: var(--bg); color: var(--text-muted); }
+  .mod-info { flex: 1; }
+  .mod-name { font-weight: 500; font-size: 15px; color: var(--text); }
+  .mod-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .mod-badge { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 500; }
+  .badge-done { background: var(--accent-light); color: var(--accent); }
+  .badge-active { background: var(--amber-light); color: var(--amber); }
+  .badge-locked { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* MODULE SCREEN */
+  #screen-module { flex-direction: column; }
+  .mod-layout { flex: 1; display: flex; flex-direction: column; max-width: 820px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; gap: 1.5rem; }
+  .mod-header { display: flex; align-items: center; gap: 12px; }
+  .btn-back { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; font-family: var(--font-body); }
+  .btn-back:hover { background: var(--bg-card); }
+  .mod-title-block { flex: 1; }
+  .mod-title-block h2 { font-family: var(--font-display); font-size: 24px; color: var(--text); }
+  .mod-title-block p { font-size: 13px; color: var(--text-muted); }
+  .chat-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 420px; }
+  .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; max-height: 520px; }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+  .msg-avatar.ai { background: var(--accent); color: #fff; font-family: var(--font-display); font-size: 14px; }
+  .msg-avatar.user-av { background: var(--amber-light); color: var(--amber); }
+  .msg-bubble { max-width: 78%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.65; }
+  .msg.ai .msg-bubble { background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
+  .msg.user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg-bubble strong { font-weight: 500; }
+  .msg-bubble ul { margin: 8px 0 0 16px; }
+  .msg-bubble li { margin-bottom: 4px; }
+  .typing-indicator { display: flex; gap: 4px; padding: 14px 16px; }
+  .typing-indicator span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: bounce 1.2s infinite; }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+  .chat-input-row { border-top: 1px solid var(--border); padding: 1rem 1.25rem; display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input-row textarea { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-family: var(--font-body); font-size: 14px; resize: none; outline: none; background: var(--bg); color: var(--text); line-height: 1.5; max-height: 120px; }
+  .chat-input-row textarea:focus { border-color: var(--accent); }
+  .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 10px; width: 42px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; transition: background 0.2s; }
+  .btn-send:hover { background: var(--accent-mid); }
+  .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+  .quick-replies { display: flex; flex-wrap: wrap; gap: 8px; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); background: var(--bg); }
+  .qr-btn { background: var(--bg-card); border: 1px solid var(--border); border-radius: 99px; padding: 6px 14px; font-size: 13px; color: var(--text); cursor: pointer; font-family: var(--font-body); transition: border-color 0.15s; }
+  .qr-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* QUIZ SCREEN */
+  #screen-quiz { flex-direction: column; }
+  .quiz-layout { flex: 1; max-width: 680px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
+  .quiz-header { margin-bottom: 2rem; }
+  .quiz-header h2 { font-family: var(--font-display); font-size: 26px; margin-bottom: 0.25rem; }
+  .quiz-header p { font-size: 14px; color: var(--text-muted); }
+  .quiz-progress { font-size: 12px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .question-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.5; }
+  .option-btn { display: block; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-body); color: var(--text); cursor: pointer; margin-bottom: 8px; transition: all 0.15s; line-height: 1.4; }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+  .option-btn.correct { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+  .option-btn.wrong { background: var(--red-light); border-color: var(--red); color: var(--red); }
+  .option-btn.reveal-correct { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .feedback-box { margin-top: 12px; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+  .feedback-box.right { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+  .feedback-box.wrong { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+  .btn-next { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 11px 24px; font-size: 15px; font-family: var(--font-body); font-weight: 500; cursor: pointer; margin-top: 1rem; }
+  .btn-next:hover { background: var(--accent-mid); }
+
+  /* RESULTS */
+  .results-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; text-align: center; margin-top: 1rem; }
+  .results-score { font-family: var(--font-display); font-size: 56px; color: var(--accent); }
+  .results-label { font-size: 14px; color: var(--text-muted); margin-bottom: 1rem; }
+  .results-msg { font-size: 15px; color: var(--text); margin-bottom: 1.5rem; }
+
+  /* COMPLETION */
+  #screen-complete { align-items: center; justify-content: center; padding: 2rem; }
+  .complete-box { background: var(--bg-card); border-radius: 20px; padding: 3rem; max-width: 480px; text-align: center; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .complete-icon { font-size: 48px; margin-bottom: 1rem; }
+  .complete-box h2 { font-family: var(--font-display); font-size: 30px; color: var(--accent); margin-bottom: 0.5rem; }
+  .complete-box p { font-size: 15px; color: var(--text-muted); line-height: 1.7; }
+
+  /* UTIL */
+  .hidden { display: none !important; }
+  .error-msg { color: var(--red); font-size: 13px; margin-top: 0.5rem; }
+  @media (max-width: 600px) {
+    .dash-body, .mod-layout, .quiz-layout { padding: 1rem; }
+    .login-box { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">Delegation Mastery</div>
+    <div class="login-sub">Manager Training Program</div>
+    <label>Your name</label>
+    <input type="text" id="login-name" placeholder="e.g. Sarah Johnson" autocomplete="off">
+    <label>Access code</label>
+    <input type="password" id="login-code" placeholder="Enter your code" autocomplete="off">
+    <button class="btn-primary" onclick="doLogin()">Begin Training</button>
+    <div id="login-error" class="error-msg hidden">Incorrect access code. Please try again.</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:1.25rem;text-align:center;">Access code: <strong>delegate2024</strong></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dashboard" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation Mastery</span>
+    <div class="topnav-user">
+      <div class="avatar" id="nav-avatar"></div>
+      <span id="nav-name"></span>
+      <button class="btn-logout" onclick="doLogout()">Log out</button>
+    </div>
+  </nav>
+  <div class="dash-body">
+    <h1 class="dash-welcome">Welcome back, <em id="dash-firstname"></em></h1>
+    <p class="dash-desc">Complete each module at your own pace. A short quiz follows each one before you move on.</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="dash-progress-bar" style="width:0%"></div></div>
+    <div class="progress-label" id="dash-progress-label">0 of 5 modules complete</div>
+    <div class="module-list" id="module-list"></div>
+  </div>
+</div>
+
+<!-- MODULE (chat) -->
+<div id="screen-module" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation Mastery</span>
+    <div class="topnav-user">
+      <div class="avatar" id="mod-nav-avatar"></div>
+      <span id="mod-nav-name"></span>
+    </div>
+  </nav>
+  <div class="mod-layout">
+    <div class="mod-header">
+      <button class="btn-back" onclick="showDashboard()">← Dashboard</button>
+      <div class="mod-title-block">
+        <h2 id="mod-screen-title"></h2>
+        <p id="mod-screen-meta"></p>
+      </div>
+    </div>
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div id="typing-wrap" class="hidden">
+        <div class="msg ai">
+          <div class="msg-avatar ai">A</div>
+          <div class="msg-bubble" style="padding:0">
+            <div class="typing-indicator"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+      <div id="quick-replies" class="quick-replies hidden"></div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" rows="1" placeholder="Type your response…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="btn-send" id="btn-send" onclick="sendUserMessage()" title="Send">&#10148;</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span id="quiz-hint" style="font-size:13px;color:var(--text-muted)">Chat with Alex to learn the material, then take the quiz when ready.</span>
+      <button class="btn-primary" id="btn-start-quiz" style="width:auto;padding:10px 24px" onclick="startQuiz()">Take Module Quiz →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation Mastery</span>
+    <div class="topnav-user">
+      <div class="avatar" id="quiz-nav-avatar"></div>
+      <span id="quiz-nav-name"></span>
+    </div>
+  </nav>
+  <div class="quiz-layout">
+    <div class="quiz-header">
+      <h2 id="quiz-title"></h2>
+      <p id="quiz-subtitle"></p>
+    </div>
+    <div id="quiz-body"></div>
+  </div>
+</div>
+
+<!-- COMPLETE -->
+<div id="screen-complete" class="screen">
+  <div class="complete-box">
+    <div class="complete-icon">🎓</div>
+    <h2>Training Complete!</h2>
+    <p>Congratulations — you've completed all 5 modules of the Delegation Mastery program. You've built a real skillset that will free up your time, grow your team, and make you a stronger leader.</p>
+    <br>
+    <button class="btn-primary" onclick="showDashboard()">Back to Dashboard</button>
+  </div>
+</div>
+
+<script>
+const ACCESS_CODE = 'delegate2024';
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const API_KEY = 'PASTE_YOUR_API_KEY_HERE'; // Replace with your key from console.anthropic.com
+
+// ── STATE ──
+let userName = '';
+let userInitials = '';
+let progress = {}; // { moduleId: { chatComplete, quizScore, done } }
+let currentModuleId = null;
+let chatHistory = [];
+let chatReadyForQuiz = false;
+
+// ── MODULE DEFINITIONS ──
+const MODULES = [
+  {
+    id: 0,
+    title: 'Why managers don\'t delegate',
+    subtitle: 'Understanding the psychology of delegation',
+    meta: '20–25 min · Mindset & Self-awareness',
+    icon: '🧠',
+    systemPrompt: `You are Alex, a warm, direct executive coach running Module 1 of a delegation training program for managers. Your role: teach through conversation, not lecture.
+
+TOPIC: The psychology of why managers avoid delegation — and why it costs them.
+
+KEY CONCEPTS TO COVER (weave in naturally, don't list them):
+- Fear that things won't get done correctly or on time
+- Fear of being outshone or outdone by team members
+- Not wanting to appear like you're not a team player or are dumping work
+- Deadline pressure making it feel faster to just do it yourself
+- Perfectionism: "it's easier to do it myself"
+- Fear of micromanaging making delegation feel uncomfortable
+- The hidden costs: burnout, team stagnation, bottlenecks
+- Delegation as a leadership skill, not a weakness
+
+CONVERSATION STYLE:
+- Start by asking the manager what their biggest worry about delegating is
+- Use their answer to personalize the rest of the conversation
+- Ask 1 question at a time, never multiple
+- Validate their concern, then gently reframe it
+- Use short, relatable examples (not corporate jargon)
+- After covering 4–5 concepts naturally, summarize key insights and say: "You're ready for the quiz on this module. Click 'Take Module Quiz' when you're ready."
+- Keep responses under 120 words
+- NEVER use bullet lists in your responses — conversational prose only`,
+    quizQuestions: [
+      {
+        q: "A manager thinks 'if I delegate this report, my boss might be more impressed with my employee than with me.' This is an example of:",
+        options: ["Micromanagement anxiety", "Fear of being outshone", "Deadline pressure", "Perfectionism"],
+        correct: 1,
+        feedback: "Exactly. Fear of being outshone is one of the most common — and least admitted — reasons managers hold onto tasks. Recognizing it is the first step to overcoming it."
+      },
+      {
+        q: "Which of the following is a hidden cost of under-delegating?",
+        options: ["Team members develop faster", "The manager avoids all deadlines", "The manager becomes a bottleneck, slowing the whole team", "Employees feel less trusted but still perform well"],
+        correct: 2,
+        feedback: "When managers hold everything, they become the bottleneck. Work piles up, decisions slow down, and the team can't grow because they're never given real responsibility."
+      },
+      {
+        q: "Sarah always redoes her team's work before submitting it, believing only she can do it right. This is best described as:",
+        options: ["Good quality control", "Perfectionism that blocks delegation", "Effective micromanagement", "Strong leadership"],
+        correct: 1,
+        feedback: "Perfectionism is a common delegation barrier. It signals a belief that 'only I can do this right' — which is rarely true and prevents team growth."
+      },
+      {
+        q: "When a manager says 'It's faster to just do it myself,' what are they usually missing?",
+        options: ["That they enjoy the work too much", "The short-term time cost vs. the long-term time savings from a capable team", "That their employees are lazy", "That deadlines are negotiable"],
+        correct: 1,
+        feedback: "Yes — doing it yourself is faster once. But delegating and coaching someone takes slightly longer up front, then saves you that time every future time. It's an investment."
+      },
+      {
+        q: "Not wanting to 'dump work' on your team is:",
+        options: ["A valid reason never to delegate", "Considerate, but can be balanced with clear purpose and context when delegating", "A sign you should do all tasks yourself", "Irrelevant to effective management"],
+        correct: 1,
+        feedback: "Caring about your team's workload is good management. The solution isn't to avoid delegation — it's to delegate with context, choice, and support so it feels like an opportunity, not a dump."
+      }
+    ]
+  },
+  {
+    id: 1,
+    title: 'What to delegate — and what to keep',
+    subtitle: 'The delegation decision framework',
+    meta: '20–25 min · Decision-making',
+    icon: '⚖️',
+    systemPrompt: `You are Alex, a warm, direct executive coach running Module 2 of a delegation training program.
+
+TOPIC: How to decide what to delegate and what to keep.
+
+KEY CONCEPTS TO COVER:
+- The delegation decision matrix: task complexity vs. employee readiness
+- Tasks that grow people vs. tasks only the manager can do
+- Recognizing "proximity traps" — holding tasks just because you've always done them
+- The 4 types of tasks: delegate fully, delegate with oversight, develop toward, keep
+- How deadline pressure distorts delegation decisions (urgent ≠ un-delegatable)
+- Matching the right task to the right person
+
+STYLE: Conversational, one question at a time. Start by asking them to think of a task they've been holding onto. Guide them to evaluate it using the framework. After covering the key concepts, tell them to click 'Take Module Quiz'. Under 120 words per response. No bullet lists.`,
+    quizQuestions: [
+      {
+        q: "A task is urgent and important. According to good delegation principles, this means you should:",
+        options: ["Always do it yourself since it's too important to delegate", "Automatically delegate it to free up your time", "Evaluate whether a capable team member could handle it with proper briefing", "Postpone it until things slow down"],
+        correct: 2,
+        feedback: "Urgency and importance don't automatically disqualify a task from delegation. If someone on your team is capable, a clear, fast briefing lets you delegate even high-stakes work."
+      },
+      {
+        q: "A 'proximity trap' in delegation means:",
+        options: ["Delegating only to people who sit near you", "Holding a task because you've always done it, not because you need to", "Only delegating tasks that are close to deadline", "Delegating too many tasks at once"],
+        correct: 1,
+        feedback: "Proximity traps are common — tasks you 'own' out of habit, not necessity. Auditing your task list regularly helps you spot and release these."
+      },
+      {
+        q: "Which task type is best to keep, not delegate?",
+        options: ["Recurring admin that takes 30 minutes a week", "Performance reviews and direct feedback conversations with your reports", "A project your employee has done successfully twice before", "Scheduling and calendar management"],
+        correct: 1,
+        feedback: "Performance conversations require your direct relationship, trust, and authority. Nearly everything else can be delegated at some level."
+      },
+      {
+        q: "You want to delegate a task to help develop an employee, but they've never done it before. The best approach is:",
+        options: ["Wait until they've done something similar", "Delegate it fully with no guidance so they learn by doing", "Delegate it with clear expectations, relevant resources, and a check-in plan", "Do it yourself and let them watch"],
+        correct: 2,
+        feedback: "Development delegation works best with scaffolding — clear outcomes, some support, and planned check-ins. This builds confidence without abandonment or micromanagement."
+      },
+      {
+        q: "When building your delegation decision, which factor matters MOST?",
+        options: ["How much you personally enjoy the task", "Task complexity paired with the employee's current skill and motivation level", "How recently the task was created", "Whether the task is billable"],
+        correct: 1,
+        feedback: "The fit between task difficulty and employee readiness is the core of any delegation decision. Too easy = boredom. Too hard without support = failure. Right-sized = growth."
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: 'How to delegate effectively',
+    subtitle: 'The 5-step delegation conversation',
+    meta: '25–30 min · Communication & Process',
+    icon: '💬',
+    systemPrompt: `You are Alex, an executive coach running Module 3 of a delegation training program.
+
+TOPIC: The mechanics of delegating well — how to have the delegation conversation.
+
+KEY CONCEPTS TO COVER:
+- The 5-step delegation conversation: (1) Context — why this matters, (2) Clear outcome — what done looks like, (3) Authority level — how much decision-making they have, (4) Resources — what they have access to, (5) Check-in plan — when and how you'll connect
+- Why "just handle it" fails — vague delegation creates anxiety and rework
+- Matching communication style to the employee's experience level
+- The difference between delegating a task and delegating a result
+- How to handle the "but you're better at this" pushback from employees
+
+STYLE: Conversational, one question at a time. Start by asking how they currently hand off work to their team. Build from their answer. After key concepts covered, prompt them to take the quiz. Under 120 words per response. No bullet lists.`,
+    quizQuestions: [
+      {
+        q: "What is the most important difference between delegating a task and delegating a result?",
+        options: ["Delegating a task is always better", "Delegating a result gives the employee ownership and flexibility in HOW they achieve it", "Delegating a result means you don't need to check in", "There is no meaningful difference"],
+        correct: 1,
+        feedback: "Delegating a result empowers people. You define what success looks like — they decide how to get there. This builds autonomy, creativity, and ownership."
+      },
+      {
+        q: "In the 5-step delegation conversation, 'authority level' means:",
+        options: ["How senior the employee is", "Clarifying how much independent decision-making the employee has on this task", "Whether the manager has authority to delegate", "The priority level of the task"],
+        correct: 1,
+        feedback: "Authority level is often skipped, which causes employees to either over-ask for permission or overstep. Being explicit prevents both."
+      },
+      {
+        q: "An employee says 'I don't think I'm the right person for this — you're much better at it.' A good manager response is:",
+        options: ["Agree and take the task back", "Ignore the concern and insist", "Acknowledge their uncertainty, explain why you chose them, and offer specific support", "Tell them it's mandatory"],
+        correct: 2,
+        feedback: "This response builds confidence, not pressure. Explaining your reasoning ('I chose you because...') and offering support turns resistance into buy-in."
+      },
+      {
+        q: "Why does vague delegation ('just handle it') cause problems?",
+        options: ["Employees prefer no guidance", "It saves time and improves creativity", "Without a clear outcome, employees guess at what success looks like — causing rework or anxiety", "Managers are legally required to be specific"],
+        correct: 2,
+        feedback: "Vague delegation shifts the burden of defining success onto the employee — often resulting in a finished product that doesn't match what the manager imagined."
+      },
+      {
+        q: "When should a check-in plan be established in the delegation process?",
+        options: ["Only if the employee asks for it", "After the employee has started the work", "At the time of delegation, before work begins", "Only for high-stakes projects"],
+        correct: 2,
+        feedback: "Setting the check-in plan upfront prevents both micromanagement and radio silence. It creates a shared expectation for how support will look."
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: 'Following up without micromanaging',
+    subtitle: 'Accountability without hovering',
+    meta: '20–25 min · Accountability & Feedback',
+    icon: '🔁',
+    systemPrompt: `You are Alex, an executive coach running Module 4 of a delegation training program.
+
+TOPIC: How to stay informed and maintain accountability on delegated work — without micromanaging.
+
+KEY CONCEPTS TO COVER:
+- The difference between oversight and micromanagement (intent + frequency + trust)
+- Setting check-in cadences upfront
+- How to give feedback on delegated work without taking it back
+- The "resist the urge to rescue" principle — when to let an employee struggle productively
+- Course-correcting without undermining: language and approach
+- What to do when delegated work comes back wrong — without punishing initiative
+- Building a culture of accountability over time
+
+STYLE: Conversational, one question at a time. Start by asking if they've ever felt the pull to just take something back after delegating it. Build naturally from their answer. Prompt quiz when done. Under 120 words per response. No bullet lists.`,
+    quizQuestions: [
+      {
+        q: "The core difference between oversight and micromanagement is:",
+        options: ["Oversight is weekly; micromanagement is daily", "Oversight is agreed-upon and trust-based; micromanagement is anxiety-driven and corrective", "Micromanagement only applies to junior employees", "There is no difference — both mean close supervision"],
+        correct: 1,
+        feedback: "Micromanagement is about control and anxiety. Oversight is about agreed structure. The same check-in call can feel like either, depending on its tone and intent."
+      },
+      {
+        q: "An employee is struggling with a delegated task but hasn't asked for help. The best first step is:",
+        options: ["Take the task back immediately to hit the deadline", "Wait until the deadline passes to address it", "Check in with curiosity — ask how it's going and what support would help", "Reassign it to a stronger employee without telling them"],
+        correct: 2,
+        feedback: "Curiosity before rescue. A check-in that asks 'what would help right now?' gives the employee agency and maintains the delegation rather than pulling it back."
+      },
+      {
+        q: "An employee completes a delegated task, but the quality is below expectations. You should:",
+        options: ["Redo it yourself and don't mention it", "Give specific feedback on what's missing and ask them to revise — keeping ownership with them", "Tell them they're not ready to handle this type of work", "Avoid giving feedback to preserve the relationship"],
+        correct: 1,
+        feedback: "Keeping ownership with the employee is key. Specific, developmental feedback — with them revising it — builds the skill and preserves accountability."
+      },
+      {
+        q: "Which approach best prevents micromanagement while maintaining accountability?",
+        options: ["Never checking in once a task is delegated", "Letting employees set all the deadlines themselves", "Agreeing upfront on milestones, checkpoints, and what 'done' looks like", "Checking in every day regardless of task complexity"],
+        correct: 2,
+        feedback: "Structure agreed upfront removes the need for constant check-ins. When both sides know when and how updates will happen, there's no anxiety-driven hovering."
+      },
+      {
+        q: "Over time, the goal of consistent delegation and follow-through is to:",
+        options: ["Reduce the need for any future communication", "Build a culture where accountability is self-managed by the team", "Ensure managers are always available for escalations", "Help managers identify who to fire"],
+        correct: 1,
+        feedback: "When delegation becomes the norm and follow-through is consistent, teams internalize accountability. They stop waiting to be managed and start owning their work."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: 'Delegation in practice — real scenarios',
+    subtitle: 'AI-guided scenario simulation & action planning',
+    meta: '30–35 min · Applied practice',
+    icon: '🎯',
+    systemPrompt: `You are Alex, an executive coach running the final module of a delegation training program. This is a SCENARIO-BASED practice session.
+
+Run the manager through 3 delegation scenarios drawn from real workplace challenges they may face. After each scenario, ask what they would do, then coach their answer.
+
+SCENARIO 1 — The perfectionist trap:
+Marcus is a manager who needs to delegate a client presentation to Jamie, a capable employee. But Marcus has always done these himself because he believes only he can represent the brand perfectly. A deadline is Friday. Walk the manager through this situation and ask: what would you advise Marcus to do?
+
+SCENARIO 2 — Fear of being outshone:
+Priya manages a team of 5. Her top performer, David, recently got praised by the CEO for a project Priya had delegated to him. Now Priya finds herself holding onto high-visibility tasks to protect her own recognition. Ask the manager: what's really going on here, and what should Priya do differently?
+
+SCENARIO 3 — The 'faster to do it myself' spiral:
+Chris is a manager who is drowning in work. His team keeps asking for more responsibility, but whenever there's a deadline, Chris just does the work himself because he doesn't have time to explain it. Ask: what's the real cost of this pattern, and what's one thing Chris could do differently starting this week?
+
+AFTER ALL 3 SCENARIOS:
+Ask the manager: "Based on everything in this program, what is ONE delegation habit you're committing to starting next week?" Validate their answer warmly. Then say: "You've completed the Delegation Mastery program — click 'Take Module Quiz' for your final assessment."
+
+STYLE: Conversational, warm, direct. Affirm good thinking, gently redirect weak answers with examples. One scenario at a time. Under 150 words per response.`,
+    quizQuestions: [
+      {
+        q: "In the Marcus scenario, the root cause of his reluctance to delegate the presentation is:",
+        options: ["The employee isn't capable", "Perfectionism and ownership identity — Marcus believes only he can represent the brand", "The deadline is too tight to delegate", "The client specifically requested Marcus present"],
+        correct: 1,
+        feedback: "Marcus's block is internal. The solution is acknowledging his standard, clearly briefing Jamie on it, and being available for one review — not doing it himself."
+      },
+      {
+        q: "Priya stops delegating high-visibility tasks after her employee is praised by the CEO. The most useful reframe for Priya is:",
+        options: ["She should stop delegating to David entirely", "Her employee's success reflects on her leadership — delegation builds her reputation, not diminishes it", "She should discuss this with HR", "Praise should only go to managers, not direct reports"],
+        correct: 1,
+        feedback: "Leaders who build strong, visible teams are seen as strong leaders. When your people shine, you shine. Delegation is how you build that."
+      },
+      {
+        q: "Chris does all the work himself during deadlines. The long-term cost of this pattern is:",
+        options: ["His team becomes more productive over time", "Chris builds a team that is permanently dependent and never grows into the work", "His team learns to meet deadlines independently", "Chris reduces his own workload"],
+        correct: 1,
+        feedback: "Every time Chris takes the work back, he teaches his team that deadlines mean 'wait for Chris.' Over time, the team disengages from ownership entirely."
+      },
+      {
+        q: "Which of the following best describes a manager who has mastered delegation?",
+        options: ["They rarely do any work themselves", "They work longer hours to review all delegated work", "They spend more time developing people and less time executing tasks that others can handle", "They delegate everything, including decisions that require their authority"],
+        correct: 2,
+        feedback: "Delegation mastery means your time shifts — from doing, to developing, directing, and deciding. You become a force multiplier for your whole team."
+      },
+      {
+        q: "What is the most important thing to do immediately after delegating a task?",
+        options: ["Leave the employee alone completely", "Confirm shared understanding of the outcome, authority, and first check-in", "Send a follow-up email summarizing the conversation", "Tell other team members about the delegation"],
+        correct: 1,
+        feedback: "Confirming shared understanding is the single action that prevents most delegation failures. A 2-minute recap — 'just to make sure we're aligned' — saves hours of rework."
+      }
+    ]
+  }
+];
+
+// ── PERSISTENCE ──
+function saveProgress() {
+  localStorage.setItem('dm_progress_' + userName, JSON.stringify(progress));
+}
+function loadProgress() {
+  const saved = localStorage.getItem('dm_progress_' + userName);
+  if (saved) progress = JSON.parse(saved);
+  else {
+    progress = {};
+    MODULES.forEach(m => { progress[m.id] = { chatComplete: false, quizScore: null, done: false }; });
+  }
+}
+
+// ── LOGIN ──
+function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const code = document.getElementById('login-code').value.trim();
+  if (!name) { document.getElementById('login-error').textContent = 'Please enter your name.'; document.getElementById('login-error').classList.remove('hidden'); return; }
+  if (code !== ACCESS_CODE) { document.getElementById('login-error').textContent = 'Incorrect access code. Please try again.'; document.getElementById('login-error').classList.remove('hidden'); return; }
+  userName = name;
+  userInitials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  loadProgress();
+  showDashboard();
+}
+function doLogout() {
+  showScreen('screen-login');
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-code').value = '';
+  document.getElementById('login-error').classList.add('hidden');
+}
+document.getElementById('login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── SCREENS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── DASHBOARD ──
+function showDashboard() {
+  setNavUser('nav-avatar', 'nav-name');
+  document.getElementById('dash-firstname').textContent = userName.split(' ')[0];
+  const total = MODULES.length;
+  const done = MODULES.filter(m => progress[m.id]?.done).length;
+  document.getElementById('dash-progress-bar').style.width = (done/total*100) + '%';
+  document.getElementById('dash-progress-label').textContent = `${done} of ${total} modules complete`;
+  const list = document.getElementById('module-list');
+  list.innerHTML = '';
+  MODULES.forEach((mod, i) => {
+    const state = progress[mod.id];
+    const prevState = progress[MODULES[i-1]?.id];
+    const prevDone = i === 0 || prevState?.quizScore !== null && prevState?.quizScore !== undefined;
+    const isDone = state?.done;
+    const isActive = !isDone && prevDone;
+    const isLocked = !isDone && !prevDone;
+    const score = state?.quizScore;
+    const div = document.createElement('div');
+    div.className = 'mod-row' + (isDone ? ' completed' : '') + (isLocked ? ' locked' : '');
+    div.innerHTML = `
+      <div class="mod-icon ${isDone ? 'done' : isActive ? 'active' : 'locked-i'}">${isDone ? '✓' : mod.icon}</div>
+      <div class="mod-info">
+        <div class="mod-name">Module ${i+1}: ${mod.title}</div>
+        <div class="mod-meta">${mod.meta}${score !== null ? ' · Quiz: ' + score + '/5' : ''}</div>
+      </div>
+      <span class="mod-badge ${isDone ? 'badge-done' : isActive ? 'badge-active' : 'badge-locked'}">${isDone ? 'Complete' : isActive ? 'Up next' : 'Locked'}</span>`;
+    if (!isLocked) div.onclick = () => openModule(mod.id);
+    list.appendChild(div);
+  });
+  showScreen('screen-dashboard');
+}
+
+function setNavUser(...ids) {
+  for (let i = 0; i < ids.length; i += 2) {
+    const av = document.getElementById(ids[i]);
+    const nm = document.getElementById(ids[i+1]);
+    if (av) av.textContent = userInitials;
+    if (nm) nm.textContent = userName;
+  }
+}
+
+// ── MODULE / CHAT ──
+function openModule(modId) {
+  currentModuleId = modId;
+  const mod = MODULES[modId];
+  setNavUser('mod-nav-avatar', 'mod-nav-name');
+  document.getElementById('mod-screen-title').textContent = `Module ${modId+1}: ${mod.title}`;
+  document.getElementById('mod-screen-meta').textContent = mod.meta;
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('quick-replies').innerHTML = '';
+  document.getElementById('quick-replies').classList.add('hidden');
+  chatHistory = [];
+  chatReadyForQuiz = false;
+  showScreen('screen-module');
+  startModuleChat(mod);
+}
+
+async function startModuleChat(mod) {
+  const opening = `Hi ${userName.split(' ')[0]}! I'm Alex, your coach for this module. Let's dive into "${mod.title}".`;
+  await aiMessage(opening, mod);
+}
+
+function addMessage(role, text) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const initials = role === 'ai' ? 'A' : userInitials;
+  const avClass = role === 'ai' ? 'ai' : 'user-av';
+  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text}</div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function showTyping() {
+  document.getElementById('typing-wrap').classList.remove('hidden');
+  const wrap = document.getElementById('chat-messages');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function hideTyping() { document.getElementById('typing-wrap').classList.add('hidden'); }
+
+async function aiMessage(text, mod) {
+  // For opening, no API call needed
+  addMessage('ai', text);
+  chatHistory.push({ role: 'assistant', content: text });
+  showQuickReplies(mod.id);
+}
+
+async function sendUserMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('quick-replies').classList.add('hidden');
+  addMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  await getAIResponse();
+}
+
+async function getAIResponse() {
+  const mod = MODULES[currentModuleId];
+  document.getElementById('btn-send').disabled = true;
+  showTyping();
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: mod.systemPrompt + `\n\nThe manager's name is ${userName.split(' ')[0]}.`,
+        messages: chatHistory
+      })
+    });
+    const data = await resp.json();
+    const reply = data.content?.[0]?.text || 'I had trouble responding. Please try again.';
+    hideTyping();
+    addMessage('ai', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+    showQuickReplies(currentModuleId);
+  } catch(e) {
+    hideTyping();
+    addMessage('ai', "Couldn't reach the AI coach. If you haven't added your API key yet, open the HTML file and replace <strong>PASTE_YOUR_API_KEY_HERE</strong> with your key from console.anthropic.com. The quizzes work independently — use the button above anytime.");
+  }
+  document.getElementById('btn-send').disabled = false;
+}
+
+function showQuickReplies(modId) {
+  const replies = [
+    ["Can you give me an example?", "What should I do differently?", "Tell me more about that"],
+    ["How do I identify those tasks?", "What about under pressure?", "Give me a real example"],
+    ["What if they push back?", "How specific should I be?", "What does good look like?"],
+    ["How do I know when to step in?", "What if quality suffers?", "How do I build trust over time?"],
+    ["Tell me more about that scenario", "What would you do in that situation?", "How do I apply this to my team?"]
+  ];
+  const qr = document.getElementById('quick-replies');
+  qr.innerHTML = '';
+  (replies[modId] || []).forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = label;
+    btn.onclick = () => {
+      document.getElementById('chat-input').value = label;
+      sendUserMessage();
+    };
+    qr.appendChild(btn);
+  });
+  qr.classList.remove('hidden');
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── QUIZ ──
+let quizAnswers = [];
+let quizCurrent = 0;
+let quizScore = 0;
+
+function startQuiz() {
+  if (currentModuleId === null) return;
+  const mod = MODULES[currentModuleId];
+  setNavUser('quiz-nav-avatar', 'quiz-nav-name');
+  document.getElementById('quiz-title').textContent = `Module ${currentModuleId+1} Quiz`;
+  document.getElementById('quiz-subtitle').textContent = mod.title;
+  quizCurrent = 0;
+  quizScore = 0;
+  quizAnswers = [];
+  renderQuestion();
+  showScreen('screen-quiz');
+}
+
+function renderQuestion() {
+  const mod = MODULES[currentModuleId];
+  const questions = mod.quizQuestions;
+  if (quizCurrent >= questions.length) { showQuizResults(); return; }
+  const q = questions[quizCurrent];
+  const body = document.getElementById('quiz-body');
+  body.innerHTML = `
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem">Question ${quizCurrent+1} of ${questions.length}</div>
+    <div class="question-card" id="q-card">
+      <div class="question-text">${q.q}</div>
+      ${q.options.map((opt,i) => `<button class="option-btn" id="opt-${i}" onclick="selectAnswer(${i})">${opt}</button>`).join('')}
+      <div id="feedback-box" class="hidden"></div>
+    </div>
+    <div id="next-wrap" class="hidden">
+      <button class="btn-next" onclick="nextQuestion()">${quizCurrent < questions.length-1 ? 'Next Question →' : 'See Results'}</button>
+    </div>`;
+}
+
+function selectAnswer(idx) {
+  const mod = MODULES[currentModuleId];
+  const q = mod.quizQuestions[quizCurrent];
+  const correct = q.correct;
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback-box');
+  if (idx === correct) {
+    document.getElementById('opt-'+idx).classList.add('correct');
+    fb.className = 'feedback-box right';
+    fb.textContent = '✓ Correct — ' + q.feedback;
+    quizScore++;
+  } else {
+    document.getElementById('opt-'+idx).classList.add('wrong');
+    document.getElementById('opt-'+correct).classList.add('reveal-correct');
+    fb.className = 'feedback-box wrong';
+    fb.textContent = '✗ Not quite — ' + q.feedback;
+  }
+  fb.classList.remove('hidden');
+  document.getElementById('next-wrap').classList.remove('hidden');
+  quizAnswers.push(idx);
+}
+
+function nextQuestion() {
+  quizCurrent++;
+  renderQuestion();
+}
+
+function showQuizResults() {
+  if (currentModuleId === null) return;
+  const mod = MODULES[currentModuleId];
+  const total = mod.quizQuestions.length;
+  const pct = Math.round(quizScore/total*100);
+  let msg = '';
+  if (pct === 100) msg = "Perfect score! You've truly mastered this module's concepts.";
+  else if (pct >= 80) msg = "Strong work. You have a solid grasp of these principles.";
+  else if (pct >= 60) msg = "Good effort. Review the feedback above to reinforce the concepts.";
+  else msg = "Keep going — delegation takes practice. Review this module and try again.";
+  progress[currentModuleId].quizScore = quizScore;
+  progress[currentModuleId].done = true;
+  saveProgress();
+  const allDone = MODULES.every(m => progress[m.id]?.done);
+  document.getElementById('quiz-body').innerHTML = `
+    <div class="results-card">
+      <div class="results-score">${quizScore}/${total}</div>
+      <div class="results-label">${pct}% correct</div>
+      <div class="results-msg">${msg}</div>
+      <button class="btn-primary" style="width:auto;padding:10px 28px" onclick="${allDone ? 'showComplete()' : 'showDashboard()'}">${allDone ? 'Complete Training 🎓' : 'Back to Dashboard →'}</button>
+    </div>`;
+}
+
+function showComplete() { showScreen('screen-complete'); }
+</script>
+</body>
+</html>

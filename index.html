@@ -724,7 +724,7 @@ async function getAIResponse() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: mod.systemPrompt + `\n\nThe manager's name is ${userName.split(' ')[0]}.`,
         messages: chatHistory

@@ -170,6 +170,13 @@
     <input type="password" id="login-code" placeholder="Enter your code" autocomplete="off">
     <button class="btn-primary" onclick="doLogin()">Begin Training</button>
     <div id="login-error" class="error-msg hidden">Incorrect access code. Please try again.</div>
+    <div style="border-top:1px solid var(--border);margin-top:1.5rem;padding-top:1.5rem">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500">ADMIN SETUP (one time only)</div>
+      <label>Anthropic API Key</label>
+      <input type="password" id="admin-api-key" placeholder="sk-ant-..." autocomplete="off">
+      <button class="btn-primary" style="background:var(--amber)" onclick="saveApiKey()">Save API Key</button>
+      <div id="api-key-status" style="font-size:12px;margin-top:8px;color:var(--accent)"></div>
+    </div>
 
   </div>
 </div>
@@ -265,7 +272,7 @@
 <script>
 const ACCESS_CODE = 'delegate2024';
 const API_URL = 'https://api.anthropic.com/v1/messages';
-const API_KEY = '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';
+let API_KEY = localStorage.getItem('dm_api_key') || '';
 
 // ── STATE ──
 let userName = '';
@@ -567,6 +574,16 @@ function loadProgress() {
 }
 
 // ── LOGIN ──
+function saveApiKey() {
+  const key = document.getElementById('admin-api-key').value.trim();
+  if (!key.startsWith('sk-ant-')) { document.getElementById('api-key-status').textContent = 'Invalid key format — should start with sk-ant-'; document.getElementById('api-key-status').style.color = 'var(--red)'; return; }
+  localStorage.setItem('dm_api_key', key);
+  API_KEY = key;
+  document.getElementById('api-key-status').textContent = '✓ API key saved — Alex is ready';
+  document.getElementById('api-key-status').style.color = 'var(--accent)';
+  document.getElementById('admin-api-key').value = '';
+}
+
 function doLogin() {
   const name = document.getElementById('login-name').value.trim();
   const code = document.getElementById('login-code').value.trim();
@@ -584,6 +601,7 @@ function doLogout() {
   document.getElementById('login-error').classList.add('hidden');
 }
 document.getElementById('login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+if (API_KEY) { document.getElementById('api-key-status').textContent = '✓ API key already saved — Alex is ready'; document.getElementById('api-key-status').style.color = 'var(--accent)'; }
 
 // ── SCREENS ──
 function showScreen(id) {

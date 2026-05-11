@@ -187,7 +187,7 @@
   <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;max-width:560px;width:100%;box-shadow:var(--shadow);">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;flex-shrink:0;">A</div>
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;flex-shrink:0;">J</div>
         <div>
           <div style="font-weight:500;font-size:16px;">JJ</div>
           <div style="font-size:13px;color:var(--text-muted);">Your delegation coach</div>
@@ -247,7 +247,7 @@
       <div class="chat-messages" id="chat-messages"></div>
       <div id="typing-wrap" class="hidden">
         <div class="msg ai">
-          <div class="msg-avatar ai">A</div>
+          <div class="msg-avatar ai">J</div>
           <div class="msg-bubble" style="padding:0">
             <div class="typing-indicator"><span></span><span></span><span></span></div>
           </div>
@@ -339,7 +339,7 @@ CONVERSATION STYLE:
 - Ask 1 question at a time, never multiple
 - Validate their concern, then gently reframe it
 - Use short, relatable examples (not corporate jargon)
-- After covering 4–5 concepts naturally, summarize key insights and say: "You're ready for the quiz on this module. Click 'Take Module Quiz' when you're ready."
+- After covering 4–5 concepts naturally, summarize the key insights in 2–3 sentences, then say exactly: "You're ready to take the quiz — click 'Take Module Quiz' to continue."
 - Keep responses under 120 words
 - NEVER use bullet lists in your responses — conversational prose only`,
     quizQuestions: [
@@ -393,7 +393,7 @@ KEY CONCEPTS TO COVER:
 - How deadline pressure distorts delegation decisions (urgent ≠ un-delegatable)
 - Matching the right task to the right person
 
-STYLE: Conversational, one question at a time. Start by asking them to think of a task they've been holding onto. Guide them to evaluate it using the framework. After covering the key concepts, tell them to click 'Take Module Quiz'. Under 120 words per response. No bullet lists.`,
+STYLE: Conversational, one question at a time. Start by asking them to think of a task they've been holding onto. Guide them to evaluate it using the framework. After covering the key concepts, summarize briefly, then say exactly: "You're ready to take the quiz — click 'Take Module Quiz' to continue." Under 120 words per response. No bullet lists.`,
     quizQuestions: [
       {
         q: "A task is urgent and important. According to good delegation principles, this means you should:",
@@ -497,7 +497,7 @@ KEY CONCEPTS TO COVER:
 - What to do when delegated work comes back wrong — without punishing initiative
 - Building a culture of accountability over time
 
-STYLE: Conversational, one question at a time. Start by asking if they've ever felt the pull to just take something back after delegating it. Build naturally from their answer. Prompt quiz when done. Under 120 words per response. No bullet lists.`,
+STYLE: Conversational, one question at a time. Start by asking if they've ever felt the pull to just take something back after delegating it. Build naturally from their answer. After covering key concepts, summarize briefly, then say exactly: "You're ready to take the quiz — click 'Take Module Quiz' to continue." Under 120 words per response. No bullet lists.`,
     quizQuestions: [
       {
         q: "The core difference between oversight and micromanagement is:",
@@ -551,7 +551,7 @@ SCENARIO 3 — The 'faster to do it myself' spiral:
 Chris is a manager who is drowning in work. His team keeps asking for more responsibility, but whenever there's a deadline, Chris just does the work himself because he doesn't have time to explain it. Ask: what's the real cost of this pattern, and what's one thing Chris could do differently starting this week?
 
 AFTER ALL 3 SCENARIOS:
-Ask the manager: "Based on everything in this program, what is ONE delegation habit you're committing to starting next week?" Validate their answer warmly. Then say: "You've completed the Delegation Mastery program — click 'Take Module Quiz' for your final assessment."
+Ask the manager: "Based on everything in this program, what is ONE delegation habit you're committing to starting next week?" Validate their answer warmly. Then say exactly: "You're ready to take the quiz — click 'Take Module Quiz' to continue."
 
 STYLE: Conversational, warm, direct. Affirm good thinking, gently redirect weak answers with examples. One scenario at a time. Under 150 words per response.`,
     quizQuestions: [
@@ -698,6 +698,8 @@ function startModule() {
   document.getElementById('quick-replies').innerHTML = '';
   document.getElementById('quick-replies').classList.add('hidden');
   document.getElementById('quick-replies-label').classList.add('hidden');
+  document.getElementById('btn-start-quiz').style.display = 'none';
+  document.getElementById('quiz-hint').textContent = 'Complete your conversation with JJ to unlock the quiz.';
   chatHistory = [];
   chatReadyForQuiz = false;
   showScreen('screen-module');
@@ -786,6 +788,15 @@ async function getAIResponse() {
     hideTyping();
     addMessage('ai', reply);
     chatHistory.push({ role: 'assistant', content: reply });
+    // Check if JJ has signalled end of module
+    const lowerReply = reply.toLowerCase();
+    if (lowerReply.includes('take module quiz') || lowerReply.includes('ready for the quiz') || lowerReply.includes('click') && lowerReply.includes('quiz')) {
+      chatReadyForQuiz = true;
+      progress[currentModuleId].chatComplete = true;
+      saveProgress();
+      document.getElementById('btn-start-quiz').style.display = 'inline-block';
+      document.getElementById('quiz-hint').textContent = 'Great work — you're ready for the quiz!';
+    }
     showQuickReplies(currentModuleId);
   } catch(e) {
     hideTyping();

@@ -175,6 +175,38 @@
   </div>
 </div>
 
+<!-- INTRO -->
+<div id="screen-intro" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation Mastery</span>
+    <div class="topnav-user">
+      <div class="avatar" id="intro-nav-avatar"></div>
+      <span id="intro-nav-name"></span>
+    </div>
+  </nav>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;max-width:560px;width:100%;box-shadow:var(--shadow);">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;flex-shrink:0;">A</div>
+        <div>
+          <div style="font-weight:500;font-size:16px;">JJ</div>
+          <div style="font-size:13px;color:var(--text-muted);">Your delegation coach</div>
+        </div>
+      </div>
+      <div id="intro-message" style="font-size:15px;line-height:1.8;color:var(--text);margin-bottom:2rem;"></div>
+      <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Why your own words matter</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7;">The quick-reply prompts at the bottom of each chat are there if you get stuck — but the more you respond in your own words, the more I can tailor the coaching to <em>your</em> specific situation. There are no wrong answers. Honest responses make this training far more useful than perfect ones.</div>
+      </div>
+      <div style="background:var(--amber-light);border:1px solid var(--amber);border-radius:10px;padding:1rem 1.25rem;margin-bottom:2rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--amber);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">How this works</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7;">Each module is a conversation with me. I'll ask you questions, you respond, and we'll work through the material together. When you're ready, take the quiz at the top right — you need to complete it before moving to the next module.</div>
+      </div>
+      <button class="btn-primary" onclick="startModule()">Start Module →</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="screen-dashboard" class="screen">
   <nav class="topnav">
@@ -221,14 +253,14 @@
           </div>
         </div>
       </div>
-      <div id="quick-replies" class="quick-replies hidden"></div>
+      <div id="quick-replies-label" class="hidden" style="padding:0.5rem 1.25rem 0;font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:var(--bg)">Need a starting point?</div><div id="quick-replies" class="quick-replies hidden"></div>
       <div class="chat-input-row">
         <textarea id="chat-input" rows="1" placeholder="Type your response…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         <button class="btn-send" id="btn-send" onclick="sendUserMessage()" title="Send">&#10148;</button>
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <span id="quiz-hint" style="font-size:13px;color:var(--text-muted)">Chat with Alex to learn the material, then take the quiz when ready.</span>
+      <span id="quiz-hint" style="font-size:13px;color:var(--text-muted)">Type your own response first — JJ personalizes the coaching to your answers. Use the prompts below only if you need a starting point.</span>
       <button class="btn-primary" id="btn-start-quiz" style="width:auto;padding:10px 24px" onclick="startQuiz()">Take Module Quiz →</button>
     </div>
   </div>
@@ -287,7 +319,7 @@ const MODULES = [
     subtitle: 'Understanding the psychology of delegation',
     meta: '20–25 min · Mindset & Self-awareness',
     icon: '🧠',
-    systemPrompt: `You are Alex, a warm, direct executive coach running Module 1 of a delegation training program for managers. Your role: teach through conversation, not lecture.
+    systemPrompt: `You are JJ, a warm, direct executive coach running Module 1 of a delegation training program for managers. Your role: teach through conversation, not lecture.
 
 TOPIC: The psychology of why managers avoid delegation — and why it costs them.
 
@@ -349,7 +381,7 @@ CONVERSATION STYLE:
     subtitle: 'The delegation decision framework',
     meta: '20–25 min · Decision-making',
     icon: '⚖️',
-    systemPrompt: `You are Alex, a warm, direct executive coach running Module 2 of a delegation training program.
+    systemPrompt: `You are JJ, a warm, direct executive coach running Module 2 of a delegation training program.
 
 TOPIC: How to decide what to delegate and what to keep.
 
@@ -401,7 +433,7 @@ STYLE: Conversational, one question at a time. Start by asking them to think of 
     subtitle: 'The 5-step delegation conversation',
     meta: '25–30 min · Communication & Process',
     icon: '💬',
-    systemPrompt: `You are Alex, an executive coach running Module 3 of a delegation training program.
+    systemPrompt: `You are JJ, an executive coach running Module 3 of a delegation training program.
 
 TOPIC: The mechanics of delegating well — how to have the delegation conversation.
 
@@ -452,7 +484,7 @@ STYLE: Conversational, one question at a time. Start by asking how they currentl
     subtitle: 'Accountability without hovering',
     meta: '20–25 min · Accountability & Feedback',
     icon: '🔁',
-    systemPrompt: `You are Alex, an executive coach running Module 4 of a delegation training program.
+    systemPrompt: `You are JJ, an executive coach running Module 4 of a delegation training program.
 
 TOPIC: How to stay informed and maintain accountability on delegated work — without micromanaging.
 
@@ -505,7 +537,7 @@ STYLE: Conversational, one question at a time. Start by asking if they've ever f
     subtitle: 'AI-guided scenario simulation & action planning',
     meta: '30–35 min · Applied practice',
     icon: '🎯',
-    systemPrompt: `You are Alex, an executive coach running the final module of a delegation training program. This is a SCENARIO-BASED practice session.
+    systemPrompt: `You are JJ, an executive coach running the final module of a delegation training program. This is a SCENARIO-BASED practice session.
 
 Run the manager through 3 delegation scenarios drawn from real workplace challenges they may face. After each scenario, ask what they would do, then coach their answer.
 
@@ -576,7 +608,7 @@ function saveApiKey() {
   if (!key.startsWith('sk-ant-')) { document.getElementById('api-key-status').textContent = 'Invalid key format — should start with sk-ant-'; document.getElementById('api-key-status').style.color = 'var(--red)'; return; }
   localStorage.setItem('dm_api_key', key);
   API_KEY = key;
-  document.getElementById('api-key-status').textContent = '✓ API key saved — Alex is ready';
+  document.getElementById('api-key-status').textContent = '✓ API key saved — JJ is ready';
   document.getElementById('api-key-status').style.color = 'var(--accent)';
   document.getElementById('admin-api-key').value = '';
 }
@@ -598,7 +630,7 @@ function doLogout() {
   document.getElementById('login-error').classList.add('hidden');
 }
 document.getElementById('login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-if (API_KEY) { document.getElementById('api-key-status').textContent = '✓ API key already saved — Alex is ready'; document.getElementById('api-key-status').style.color = 'var(--accent)'; }
+if (API_KEY) { document.getElementById('api-key-status').textContent = '✓ API key already saved — JJ is ready'; document.getElementById('api-key-status').style.color = 'var(--accent)'; }
 
 // ── SCREENS ──
 function showScreen(id) {
@@ -652,12 +684,20 @@ function setNavUser(...ids) {
 function openModule(modId) {
   currentModuleId = modId;
   const mod = MODULES[modId];
+  setNavUser('intro-nav-avatar', 'intro-nav-name');
+  document.getElementById('intro-message').innerHTML = `Hi <strong>${userName.split(' ')[0]}</strong>! Welcome to <strong>Module ${modId+1}: ${mod.title}</strong>.<br><br>In this session we'll explore ${mod.subtitle.toLowerCase()}. I'll guide you through the key concepts by asking you questions about your own experience — so you get coaching that's relevant to how you actually manage, not just theory.<br><br>Take your time with each response. This isn't a test — it's a conversation.`;
+  showScreen('screen-intro');
+}
+
+function startModule() {
+  const mod = MODULES[currentModuleId];
   setNavUser('mod-nav-avatar', 'mod-nav-name');
-  document.getElementById('mod-screen-title').textContent = `Module ${modId+1}: ${mod.title}`;
+  document.getElementById('mod-screen-title').textContent = `Module ${currentModuleId+1}: ${mod.title}`;
   document.getElementById('mod-screen-meta').textContent = mod.meta;
   document.getElementById('chat-messages').innerHTML = '';
   document.getElementById('quick-replies').innerHTML = '';
   document.getElementById('quick-replies').classList.add('hidden');
+  document.getElementById('quick-replies-label').classList.add('hidden');
   chatHistory = [];
   chatReadyForQuiz = false;
   showScreen('screen-module');
@@ -665,7 +705,7 @@ function openModule(modId) {
 }
 
 async function startModuleChat(mod) {
-  const opening = `Hi ${userName.split(' ')[0]}! I'm Alex, your coach for this module. Let's dive into "${mod.title}".`;
+  const opening = `Hi ${userName.split(' ')[0]}! I'm JJ, your coach for this module. Let's dive into "${mod.title}".`;
   await aiMessage(opening, mod);
 }
 
@@ -701,6 +741,7 @@ async function sendUserMessage() {
   input.value = '';
   input.style.height = 'auto';
   document.getElementById('quick-replies').classList.add('hidden');
+  document.getElementById('quick-replies-label').classList.add('hidden');
   addMessage('user', text);
   chatHistory.push({ role: 'user', content: text });
   await getAIResponse();
@@ -748,11 +789,11 @@ async function getAIResponse() {
 
 function showQuickReplies(modId) {
   const replies = [
-    ["Can you give me an example?", "What should I do differently?", "Tell me more about that"],
-    ["How do I identify those tasks?", "What about under pressure?", "Give me a real example"],
-    ["What if they push back?", "How specific should I be?", "What does good look like?"],
-    ["How do I know when to step in?", "What if quality suffers?", "How do I build trust over time?"],
-    ["Tell me more about that scenario", "What would you do in that situation?", "How do I apply this to my team?"]
+    ["I worry things won't get done right", "I don't want to seem like I'm dumping work", "I'm afraid of losing control of the outcome"],
+    ["I handle all client communications myself", "I do most of the reporting and summaries", "I manage all deadlines and follow-ups personally"],
+    ["I usually just tell them what needs doing", "I send a quick Slack or email with the basics", "I try to explain but it takes too long under pressure"],
+    ["Yes, when the quality wasn't where I needed it", "Yes, when a deadline was too close to risk it", "I try not to but it happens more than I'd like"],
+    ["Marcus should brief Jamie clearly and trust her", "Priya needs to see her team's success as her own", "Chris needs to invest time upfront to save time later"]
   ];
   const qr = document.getElementById('quick-replies');
   qr.innerHTML = '';
@@ -767,6 +808,7 @@ function showQuickReplies(modId) {
     qr.appendChild(btn);
   });
   qr.classList.remove('hidden');
+  document.getElementById('quick-replies-label').classList.remove('hidden');
 }
 
 function handleKey(e) {

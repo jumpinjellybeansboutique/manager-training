@@ -603,15 +603,7 @@ function loadProgress() {
 }
 
 // ── LOGIN ──
-function saveApiKey() {
-  const key = document.getElementById('admin-api-key').value.trim();
-  if (!key.startsWith('sk-ant-')) { document.getElementById('api-key-status').textContent = 'Invalid key format — should start with sk-ant-'; document.getElementById('api-key-status').style.color = 'var(--red)'; return; }
-  localStorage.setItem('dm_api_key', key);
-  API_KEY = key;
-  document.getElementById('api-key-status').textContent = '✓ API key saved — JJ is ready';
-  document.getElementById('api-key-status').style.color = 'var(--accent)';
-  document.getElementById('admin-api-key').value = '';
-}
+
 
 function doLogin() {
   const name = document.getElementById('login-name').value.trim();
@@ -630,7 +622,7 @@ function doLogout() {
   document.getElementById('login-error').classList.add('hidden');
 }
 document.getElementById('login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-if (API_KEY) { document.getElementById('api-key-status').textContent = '✓ API key already saved — JJ is ready'; document.getElementById('api-key-status').style.color = 'var(--accent)'; }
+
 
 // ── SCREENS ──
 function showScreen(id) {

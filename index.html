@@ -705,7 +705,14 @@ function startModule() {
 }
 
 async function startModuleChat(mod) {
-  const opening = `Hi ${userName.split(' ')[0]}! I'm JJ, your coach for this module. Let's dive into "${mod.title}".`;
+  const openings = [
+    `Hi ${userName.split(' ')[0]}! I'm JJ, your coach for this module. Before we dig into the psychology of delegation, I want to start with you — what's your biggest hesitation when it comes to handing work off to someone on your team?`,
+    `Hi ${userName.split(' ')[0]}! I'm JJ, and in this module we're going to get practical about what you should and shouldn't delegate. Let's start simple — is there a task you've been holding onto that you suspect someone on your team could probably handle? What is it?`,
+    `Hi ${userName.split(' ')[0]}! I'm JJ. This module is all about how to actually have the delegation conversation — not just deciding to delegate, but doing it well. To start, how do you currently hand work off to your team? Walk me through what that typically looks like.`,
+    `Hi ${userName.split(' ')[0]}! I'm JJ. This module is about staying involved without micromanaging — a balance most managers find genuinely hard. Let me ask you straight: have you ever delegated something and then felt the pull to just take it back? What happened?`,
+    `Hi ${userName.split(' ')[0]}! I'm JJ, and this is our final module — we're going to work through some real scenarios together. I'll describe a situation, you tell me what you'd do, and we'll dig into it from there. Ready? Let's start with our first manager.`
+  ];
+  const opening = openings[mod.id] || `Hi ${userName.split(' ')[0]}! I'm JJ, your coach for this module. Let's dive into "${mod.title}". What comes to mind when you think about this topic?`;
   await aiMessage(opening, mod);
 }
 

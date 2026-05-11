@@ -296,6 +296,10 @@
 </div>
 
 <script>
+window.onerror = function(msg, src, line, col, err) {
+  alert('JS Error on line ' + line + ': ' + msg);
+  return false;
+};
 const ACCESS_CODE = 'delegate2024';
 const API_URL = 'https://api.anthropic.com/v1/messages';
 

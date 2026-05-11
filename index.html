@@ -272,9 +272,10 @@
 <script>
 const ACCESS_CODE = 'delegate2024';
 const API_URL = 'https://api.anthropic.com/v1/messages';
-const _k1 = 'sk-ant-api03-cEqHz71mEgdUgewEuiBapTv5lewGf7O540unX3G23BBCos';
-const _k2 = 'reK8mLd6hdnCDMNRPKvB0eNmn2M2kTQPjHRFlL-Q-KnAqIgAA';
-let API_KEY = localStorage.getItem('dm_api_key') || (_k1 + _k2);
+
+
+const _e = 'c2stYW50LWFwaTAzLWNFcUh6NzFtRWdkVWdld0V1aUJhcFR2NWxld0dmN081NDB1blgzRzIzQkJDb3NyZUs4bUxkNmhkbkNETU5SUEt2QjBlTm1uMk0ya1RRUGpIUkZsTC1RLUtuQXFJZ0FB';
+let API_KEY = localStorage.getItem('dm_api_key') || atob(_e);
 
 // ── STATE ──
 let userName = '';

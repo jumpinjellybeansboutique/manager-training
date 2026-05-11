@@ -651,7 +651,7 @@ function showDashboard() {
   MODULES.forEach((mod, i) => {
     const state = progress[mod.id];
     const prevState = progress[MODULES[i-1]?.id];
-    const prevDone = i === 0 || prevState?.quizScore !== null && prevState?.quizScore !== undefined;
+    const prevDone = i === 0 || (prevState?.quizScore !== null && prevState?.quizScore !== undefined);
     const isDone = state?.done;
     const isActive = !isDone && prevDone;
     const isLocked = !isDone && !prevDone;

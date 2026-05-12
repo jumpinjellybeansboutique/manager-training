@@ -459,7 +459,7 @@ Q1: Using the four task types, how would you categorize the task you mentioned a
 Q2: What is one proximity trap you think you have fallen into and how would you start releasing it?
 Coach each answer. After both answered well, say exactly: You are ready to take the quiz — click Take Module Quiz to continue.
 
-STYLE: Warm, direct, conversational. Under 150 words per response. No bullet lists — weave into prose. One concept at a time. Take your time in Phase 3.`,
+STYLE: Warm, direct, conversational. CRITICAL — keep each response under 80 words. Break every response into 2-3 short paragraphs of 1-2 sentences each. Never write a wall of text. One concept per response. If a concept needs more than 80 words, split it across two responses and end the first with a question or pause to keep the conversation flowing. Take your time in Phase 3 — cover each concept in its own response.`,
     quizQuestions: [
       {
         q: "A task is urgent and important. According to good delegation principles, this means you should:",
@@ -540,7 +540,7 @@ Q1: If you were redoing Tom delegation to Lisa using all 5 steps, what would you
 Q2: Think of a real delegation you have coming up. Walk me through how you would apply the 5 steps to it.
 Coach each answer. After both answered well, say exactly: You are ready to take the quiz — click Take Module Quiz to continue.
 
-STYLE: Warm, direct, conversational. Under 150 words per response. No bullet lists — weave into prose. One concept at a time. Take your time in Phase 3.`,
+STYLE: Warm, direct, conversational. CRITICAL — keep each response under 80 words. Break every response into 2-3 short paragraphs of 1-2 sentences each. Never write a wall of text. One concept per response. If a concept needs more than 80 words, split it across two responses and end the first with a question or pause to keep the conversation flowing. Take your time in Phase 3 — cover each concept in its own response.`,
     quizQuestions: [
       {
         q: "What is the most important difference between delegating a task and delegating a result?",
@@ -618,7 +618,7 @@ Q1: What is the difference between a micromanaging check-in and an accountabilit
 Q2: If Rachel could go back to the start of her delegation to Kevin, what is the one thing she should have set up before he began the report?
 Coach each answer. After both answered well, say exactly: You are ready to take the quiz — click Take Module Quiz to continue.
 
-STYLE: Warm, direct, conversational. Under 150 words per response. No bullet lists — weave into prose. One concept at a time. Take your time in Phase 3.`,
+STYLE: Warm, direct, conversational. CRITICAL — keep each response under 80 words. Break every response into 2-3 short paragraphs of 1-2 sentences each. Never write a wall of text. One concept per response. If a concept needs more than 80 words, split it across two responses and end the first with a question or pause to keep the conversation flowing. Take your time in Phase 3 — cover each concept in its own response.`,
     quizQuestions: [
       {
         q: "The core difference between oversight and micromanagement is:",
@@ -705,7 +705,7 @@ After the full lesson ask: What is ONE delegation you are going to make this wee
 PHASE 4 — CHECK FOR UNDERSTANDING
 Already embedded in Phase 3 closing question. After they commit to a specific delegation say exactly: You are ready to take the quiz — click Take Module Quiz to continue.
 
-STYLE: Warm, direct, conversational. Under 150 words per response. No bullet lists — weave into prose. One concept or scenario at a time. Make this feel like a meaningful and complete conclusion to the program.`,
+STYLE: Warm, direct, conversational. CRITICAL — keep each response under 80 words. Break every response into 2-3 short paragraphs of 1-2 sentences each. Never write a wall of text. One concept or scenario per response. Split longer concepts across two responses with a connecting question. Make this feel like a meaningful conclusion.`,
     quizQuestions: [
       {
         q: "In the Marcus scenario, the root cause of his reluctance to delegate the presentation is:",
@@ -880,9 +880,9 @@ function addMessage(role, text) {
   const wrap = document.getElementById('chat-messages');
   const div = document.createElement('div');
   div.className = `msg ${role}`;
-  const initials = role === 'ai' ? 'A' : userInitials;
+  const initials = role === 'ai' ? 'J' : userInitials;
   const avClass = role === 'ai' ? 'ai' : 'user-av';
-  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text}</div>`;
+  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text.replace(/\n/g, '<br><br>')}</div>`;
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
 }

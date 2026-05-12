@@ -882,7 +882,7 @@ function addMessage(role, text) {
   div.className = `msg ${role}`;
   const initials = role === 'ai' ? 'J' : userInitials;
   const avClass = role === 'ai' ? 'ai' : 'user-av';
-  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text.replace(/\n/g, '<br><br>')}</div>`;
+  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text}</div>`;
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
 }
@@ -894,9 +894,24 @@ function showTyping() {
 }
 function hideTyping() { document.getElementById('typing-wrap').classList.add('hidden'); }
 
+async function sendBubbles(text) {
+  // Split on double newline or single newline to get natural paragraph chunks
+  const raw = text.split(/\n\n+|\n(?=[A-Z])/);
+  const bubbles = raw.map(s => s.trim()).filter(s => s.length > 0);
+  for (let i = 0; i < bubbles.length; i++) {
+    if (i > 0) {
+      // Show typing between bubbles
+      showTyping();
+      await new Promise(r => setTimeout(r, 600 + Math.min(bubbles[i].length * 12, 1200)));
+      hideTyping();
+    }
+    addMessage('ai', bubbles[i]);
+    await new Promise(r => setTimeout(r, 80));
+  }
+}
+
 async function aiMessage(text, mod) {
-  // For opening, no API call needed
-  addMessage('ai', text);
+  await sendBubbles(text);
   chatHistory.push({ role: 'assistant', content: text });
   showQuickReplies(mod.id);
 }
@@ -944,7 +959,7 @@ async function getAIResponse() {
     }
     const reply = data.content?.[0]?.text || 'I had trouble responding. Please try again.';
     hideTyping();
-    addMessage('ai', reply);
+    await sendBubbles(reply);
     chatHistory.push({ role: 'assistant', content: reply });
     // Update phase indicator based on JJ's response
     const rLower = reply.toLowerCase();

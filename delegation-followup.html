@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delegation in Action — Jumpin' Jellybeans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --bg-card: #FFFFFF;
+    --text: #1A1814;
+    --text-muted: #6B6660;
+    --accent: #2D5A3D;
+    --accent-light: #EAF2ED;
+    --accent-mid: #4A8A60;
+    --amber: #C17B2A;
+    --amber-light: #FBF3E8;
+    --red-light: #FBF0EF;
+    --red: #B94040;
+    --border: #E2DDD6;
+    --shadow: 0 2px 12px rgba(26,24,20,0.07);
+    --radius: 12px;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 16px; line-height: 1.6; }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* LOGIN */
+  #screen-login { align-items: center; justify-content: center; padding: 2rem; }
+  .login-box { background: var(--bg-card); border-radius: 20px; padding: 3rem 2.5rem; max-width: 420px; width: 100%; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .login-logo { font-family: var(--font-display); font-size: 26px; color: var(--accent); margin-bottom: 0.25rem; }
+  .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 0.5rem; }
+  .login-badge { display: inline-block; background: var(--amber-light); color: var(--amber); font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; margin-bottom: 1.5rem; }
+  .login-box label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .login-box input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 15px; background: var(--bg); color: var(--text); outline: none; margin-bottom: 1rem; }
+  .login-box input:focus { border-color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 11px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--accent-mid); }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* TOP NAV */
+  .topnav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; flex-shrink: 0; }
+  .topnav-logo { font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+  .topnav-user { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .btn-logout { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--text-muted); cursor: pointer; font-family: var(--font-body); }
+  .btn-logout:hover { background: var(--bg); }
+
+  /* INTRO */
+  #screen-intro { flex-direction: column; }
+
+  /* MODULE */
+  #screen-module { flex-direction: column; }
+  .mod-layout { flex: 1; display: flex; flex-direction: column; max-width: 820px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; gap: 1.5rem; }
+  .mod-header { display: flex; align-items: center; gap: 12px; }
+  .btn-back { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; font-family: var(--font-body); }
+  .btn-back:hover { background: var(--bg-card); }
+  .mod-title-block { flex: 1; }
+  .mod-title-block h2 { font-family: var(--font-display); font-size: 24px; color: var(--text); }
+  .mod-title-block p { font-size: 13px; color: var(--text-muted); }
+  .chat-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 420px; }
+  .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; max-height: 520px; }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+  .msg-avatar.ai { background: var(--accent); color: #fff; font-family: var(--font-display); font-size: 14px; }
+  .msg-avatar.user-av { background: var(--amber-light); color: var(--amber); }
+  .msg-bubble { max-width: 78%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.65; }
+  .msg.ai .msg-bubble { background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
+  .msg.user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .typing-indicator { display: flex; gap: 4px; padding: 14px 16px; }
+  .typing-indicator span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: bounce 1.2s infinite; }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+  .chat-input-row { border-top: 1px solid var(--border); padding: 1rem 1.25rem; display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input-row textarea { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-family: var(--font-body); font-size: 14px; resize: none; outline: none; background: var(--bg); color: var(--text); line-height: 1.5; max-height: 120px; }
+  .chat-input-row textarea:focus { border-color: var(--accent); }
+  .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 10px; width: 42px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; transition: background 0.2s; }
+  .btn-send:hover { background: var(--accent-mid); }
+  .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+  .quick-replies { display: flex; flex-wrap: wrap; gap: 8px; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); background: var(--bg); }
+  .qr-btn { background: var(--bg-card); border: 1px solid var(--border); border-radius: 99px; padding: 6px 14px; font-size: 13px; color: var(--text); cursor: pointer; font-family: var(--font-body); transition: border-color 0.15s; }
+  .qr-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* QUIZ */
+  #screen-quiz { flex-direction: column; }
+  .quiz-layout { flex: 1; max-width: 680px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
+  .quiz-header { margin-bottom: 2rem; }
+  .quiz-header h2 { font-family: var(--font-display); font-size: 26px; margin-bottom: 0.25rem; }
+  .quiz-header p { font-size: 14px; color: var(--text-muted); }
+  .question-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.5; }
+  .option-btn { display: block; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-family: var(--font-body); color: var(--text); cursor: pointer; margin-bottom: 8px; transition: all 0.15s; line-height: 1.4; }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }
+  .option-btn.correct { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+  .option-btn.wrong { background: var(--red-light); border-color: var(--red); color: var(--red); }
+  .option-btn.reveal-correct { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .feedback-box { margin-top: 12px; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+  .feedback-box.right { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+  .feedback-box.wrong { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+  .btn-next { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 11px 24px; font-size: 15px; font-family: var(--font-body); font-weight: 500; cursor: pointer; margin-top: 1rem; }
+  .btn-next:hover { background: var(--accent-mid); }
+  .results-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; text-align: center; margin-top: 1rem; }
+  .results-score { font-family: var(--font-display); font-size: 56px; color: var(--accent); }
+  .results-label { font-size: 14px; color: var(--text-muted); margin-bottom: 1rem; }
+  .results-msg { font-size: 15px; color: var(--text); margin-bottom: 1.5rem; }
+
+  /* COMPLETE */
+  #screen-complete { align-items: center; justify-content: center; padding: 2rem; }
+
+  .hidden { display: none !important; }
+  .error-msg { color: var(--red); font-size: 13px; margin-top: 0.5rem; }
+  @media (max-width: 600px) {
+    .mod-layout, .quiz-layout { padding: 1rem; }
+    .login-box { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">Delegation in Action</div>
+    <div class="login-sub">Jumpin' Jellybeans — Follow-Up Training</div>
+    <div class="login-badge">Complete after Delegation Mastery</div>
+    <label>Your name</label>
+    <input type="text" id="login-name" placeholder="e.g. Sarah Johnson" autocomplete="off">
+    <label>Access code</label>
+    <input type="password" id="login-code" placeholder="Enter your code" autocomplete="off">
+    <button class="btn-primary" onclick="doLogin()">Begin Follow-Up</button>
+    <div id="login-error" class="error-msg hidden">Incorrect access code. Please try again.</div>
+  </div>
+</div>
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation in Action</span>
+    <div class="topnav-user">
+      <div class="avatar" id="intro-nav-avatar"></div>
+      <span id="intro-nav-name"></span>
+    </div>
+  </nav>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;max-width:560px;width:100%;box-shadow:var(--shadow);">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;flex-shrink:0;">J</div>
+        <div>
+          <div style="font-weight:500;font-size:16px;">JJ</div>
+          <div style="font-size:13px;color:var(--text-muted);">Your delegation coach</div>
+        </div>
+      </div>
+      <div id="intro-message" style="font-size:15px;line-height:1.8;color:var(--text);margin-bottom:2rem;"></div>
+      <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">What is different this time</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7;">This is not new material. This is about what you actually did with the training. JJ will ask about real delegations you made, put you through harder scenarios, assess your delegation style, and help you identify what to work on next. Your honest answers make this valuable.</div>
+      </div>
+      <div style="background:var(--amber-light);border:1px solid var(--amber);border-radius:10px;padding:1rem 1.25rem;margin-bottom:2rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--amber);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">How this works</div>
+        <div style="font-size:14px;color:var(--text);line-height:1.7;">Four phases: accountability check on real delegations, three advanced scenarios, a delegation style assessment, and a commitment to your next step. Followed by a 10-question quiz and a completion report to send to your manager.</div>
+      </div>
+      <button class="btn-primary" onclick="startModule()">Start Follow-Up →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE -->
+<div id="screen-module" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation in Action</span>
+    <div class="topnav-user">
+      <div class="avatar" id="mod-nav-avatar"></div>
+      <span id="mod-nav-name"></span>
+    </div>
+  </nav>
+  <div class="mod-layout">
+    <div class="mod-header">
+      <div class="mod-title-block">
+        <h2>Delegation in Action</h2>
+        <p>Follow-Up Training · ~35-40 min · All 4 phases</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0;">Progress:</div>
+      <div id="phase-bar" style="display:flex;gap:6px;flex:1;">
+        <div class="phase-step" style="flex:1;text-align:center;font-size:11px;padding:5px 8px;border-radius:6px;background:var(--accent);color:#fff;font-weight:500;">1 · Accountability</div>
+        <div class="phase-step" style="flex:1;text-align:center;font-size:11px;padding:5px 8px;border-radius:6px;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">2 · Scenarios</div>
+        <div class="phase-step" style="flex:1;text-align:center;font-size:11px;padding:5px 8px;border-radius:6px;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">3 · Assessment</div>
+        <div class="phase-step" style="flex:1;text-align:center;font-size:11px;padding:5px 8px;border-radius:6px;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">4 · Commitment</div>
+      </div>
+    </div>
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div id="typing-wrap" class="hidden">
+        <div class="msg ai">
+          <div class="msg-avatar ai">J</div>
+          <div class="msg-bubble" style="padding:0">
+            <div class="typing-indicator"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+      <div id="quick-replies-label" class="hidden" style="padding:0.5rem 1.25rem 0;font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:var(--bg)">Need a starting point?</div>
+      <div id="quick-replies" class="quick-replies hidden"></div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" rows="1" placeholder="Type your response…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="btn-send" id="btn-send" onclick="sendUserMessage()" title="Send">&#10148;</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span id="quiz-hint" style="font-size:13px;color:var(--text-muted)">Work through all 4 phases with JJ to unlock the quiz.</span>
+      <button class="btn-primary" id="btn-start-quiz" style="display:none;width:auto;padding:10px 24px" onclick="startQuiz()">Take Final Quiz →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <nav class="topnav">
+    <span class="topnav-logo">Delegation in Action</span>
+    <div class="topnav-user">
+      <div class="avatar" id="quiz-nav-avatar"></div>
+      <span id="quiz-nav-name"></span>
+    </div>
+  </nav>
+  <div class="quiz-layout">
+    <div class="quiz-header">
+      <h2>Final Quiz</h2>
+      <p>Delegation in Action — Follow-Up Assessment</p>
+    </div>
+    <div id="quiz-body"></div>
+  </div>
+</div>
+
+<!-- COMPLETE -->
+<div id="screen-complete" class="screen">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div style="background:var(--bg-card);border-radius:20px;padding:2.5rem;max-width:540px;width:100%;box-shadow:var(--shadow);border:1px solid var(--border);">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:48px;margin-bottom:0.75rem;">🎯</div>
+        <h2 style="font-family:var(--font-display);font-size:28px;color:var(--accent);margin-bottom:0.25rem;">Follow-Up Complete!</h2>
+        <p style="font-size:14px;color:var(--text-muted);">Delegation in Action — Jumpin' Jellybeans</p>
+      </div>
+      <div id="score-summary" style="background:var(--bg);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem;"></div>
+      <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:12px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Send to your manager</div>
+        <div id="copy-text" style="font-size:13px;color:var(--text);line-height:1.8;font-family:monospace;white-space:pre-wrap;"></div>
+      </div>
+      <button class="btn-primary" onclick="copyResults()" id="copy-btn" style="margin-bottom:0.75rem;">Copy Results to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ACCESS_CODE = 'jbaction2024';
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const _e = 'c2stYW50LWFwaTAzLWNFcUh6NzFtRWdkVWdld0V1aUJhcFR2NWxld0dmN081NDB1blgzRzIzQkJDb3NyZUs4bUxkNmhkbkNETU5SUEt2QjBlTm1uMk0ya1RRUGpIUkZsTC1RLUtuQXFJZ0FB';
+let API_KEY = localStorage.getItem('dm_api_key') || atob(_e);
+
+let userName = '';
+let userInitials = '';
+let chatHistory = [];
+let quizScore = 0;
+let quizCurrent = 0;
+
+const SYSTEM_PROMPT = `You are JJ, a warm direct executive coach running a follow-up training session called Delegation in Action for managers at Jumpin Jellybeans, an indoor play space for kids ages 0-10. Managers oversee teams of 1-4 staff and handle birthday party sales, membership sales, customer relations, inventory, events, field trips, community partnerships, and cleaning.
+
+This manager completed the Delegation Mastery training 2 weeks ago. Your job is to find out what they actually did with the training, push them with harder scenarios, assess their delegation style honestly, and help them identify their next growth edge. Guide through 4 phases in strict order.
+
+PHASE 1 — ACCOUNTABILITY CHECK (3-4 exchanges)
+This is the most important phase. You need to understand what actually happened when they tried to delegate.
+- Open with: Welcome back! It has been a couple of weeks since you completed Delegation Mastery. Before we do anything else I want to hear what actually happened when you tried to put it into practice. Did you delegate anything new at Jumpin Jellybeans since the training?
+- Based on their answer, dig into the specifics: What did you delegate? Who did you give it to? How did you brief them? What happened? What worked and what did not?
+- If they delegated successfully: ask what made it work and what felt uncomfortable
+- If they struggled or did not delegate: ask what got in the way — was it a roadblock from the training, a specific situation, or something else?
+- If they delegated multiple things: pick the most interesting one and go deep on it
+- After 3-4 exchanges acknowledge what you have learned and say: Good. Now let me test your thinking with some harder scenarios. Move to Phase 2.
+
+PHASE 2 — ADVANCED SCENARIOS (3 scenarios, one at a time, coach each fully)
+These are harder than the original training. No clean right answer. Coach their thinking deeply.
+
+SCENARIO A — Standards under pressure:
+It is a Saturday at Jumpin Jellybeans. You have three birthday parties back to back, a field trip group arriving at noon, and the play floor is at capacity. Your most experienced team member Jordan has been handling birthday party room setups since the training — you delegated it two weeks ago and it has been going well. But today Jordan sets up the first party room and it is noticeably below your standard — wrong balloon arrangement, missing the welcome sign, party favors not laid out. The family arrives in 20 minutes. What do you do right now, and what does this situation tell you about your delegation setup?
+Coach their answer. Look for: they should fix the immediate situation without shaming Jordan, then have a proper feedback conversation after the party. The deeper issue is the setup standard was not communicated clearly enough upfront. Then move to Scenario B.
+
+SCENARIO B — Competing priorities and a small team:
+Your best team member Avery has been doing great since you started delegating membership inquiry calls to them two weeks ago. But you have noticed Avery is starting to look tired and a little stretched. You also need someone to start taking over community partnership outreach — reaching out to local schools and pediatricians offices — because it has been stalled for weeks. Avery is the obvious choice but you are worried about overloading them. Your other team member is newer and less experienced. What do you do?
+Coach their answer. Look for: they should have an honest conversation with Avery about capacity before assuming, consider developing the newer team member for the simpler tasks to free Avery up, and think about sequencing rather than piling everything on one person. Then move to Scenario C.
+
+SCENARIO C — When delegation goes wrong and trust is on the line:
+Three weeks ago you delegated handling upset parent situations to team member Casey. Casey has been doing okay but last week a parent complained to you directly saying Casey was dismissive and did not resolve their concern. You handled it yourself in the moment. Now you are second-guessing whether Casey is ready for this and wondering if you should just take it back. What do you do?
+Coach their answer. Look for: taking it back entirely is the wrong move and repeats the original delegation trap. The right answer is a specific feedback conversation with Casey about what happened, role-playing the right approach, and giving Casey another chance with a tighter check-in structure. Then say: Good thinking on all three. Now let me assess where you are. Move to Phase 3.
+
+PHASE 3 — DELEGATION STYLE ASSESSMENT (conversational, 3-4 exchanges)
+Based on everything you have heard in Phases 1 and 2, assess this manager honestly. Ask each question one at a time and respond to their answers before asking the next one.
+
+Q1: On a scale of 1-10, how confident do you feel delegating right now compared to before the training? What is still holding you back from being a 10?
+Q2: Which of the six roadblocks from the original training — fear of quality, fear of being outshone, not wanting to dump work, deadline pressure, perfectionism, or fear of micromanaging — is still showing up most for you at Jumpin Jellybeans?
+Q3: When you think about the next 4 weeks at Jumpin Jellybeans, what is the one area where you know you need to delegate more but have been avoiding it?
+
+After their answers give them an honest delegation style read — are they a reluctant delegator who is making progress, a selective delegator who delegates easy things but holds the hard ones, or an emerging developer who is starting to think like a leader. Be specific and reference what they shared. Then say: Let us lock in your next step. Move to Phase 4.
+
+PHASE 4 — COMMITMENT (1-2 exchanges)
+Ask: Based on everything we have covered today, what is ONE specific delegation you are committing to in the next 7 days at Jumpin Jellybeans — who, what task, how you will brief them, and when you will check in?
+Wait for their answer. If it is vague push for specifics. When they give a concrete answer validate it and say: That is a strong commitment. You are ready for the final quiz — click Take Final Quiz to continue.
+
+STYLE: Warm, direct, honest. Keep each response under 80 words. Send each paragraph as a separate short bubble. One question at a time. Push back gently when answers are vague or too easy. This is a more challenging session than the original training — the manager has some experience now and deserves to be pushed further.`;
+
+const QUIZ_QUESTIONS = [
+  {
+    q: "A team member sets up a birthday party room below standard and the family arrives in 20 minutes. The best first move is:",
+    options: ["Take over the setup yourself immediately without saying anything", "Fix the critical issues together with the team member quickly, then have a feedback conversation after the party", "Tell the team member they are not ready for this responsibility", "Cancel the setup delegation going forward"],
+    correct: 1,
+    feedback: "Fix the immediate situation without shaming — the family experience comes first. Then have a proper developmental conversation after the party when there is time to do it right."
+  },
+  {
+    q: "Your best team member is showing signs of being stretched too thin after you increased their responsibilities. You should:",
+    options: ["Pull back all delegations immediately", "Have an honest conversation with them about capacity before making any changes", "Silently redistribute their work without telling them", "Assume they can handle it and wait to see what happens"],
+    correct: 1,
+    feedback: "Always check in before assuming. A direct capacity conversation respects the team member and gives you real information to make good decisions with."
+  },
+  {
+    q: "A team member handled an upset parent situation poorly. Your best response is:",
+    options: ["Take that responsibility back permanently", "Give specific feedback on what went wrong, practice the right approach together, and give them another chance with clearer structure", "Avoid addressing it to preserve the relationship", "Apologize to the parent and tell them you will handle it personally going forward"],
+    correct: 1,
+    feedback: "Taking it back reinforces the original delegation trap. Specific feedback plus another chance with better structure is how you build the skill — not by removing the opportunity."
+  },
+  {
+    q: "The main difference between the original Delegation Mastery training and this follow-up is:",
+    options: ["The follow-up covers completely new delegation frameworks", "The follow-up tests whether you applied the training to real situations and identifies where you still get stuck", "The follow-up is easier because you already know the material", "The follow-up replaces the need for any further delegation practice"],
+    correct: 1,
+    feedback: "Follow-up training is about application and accountability — not new theory. The real learning happens when you apply the frameworks to actual situations and reflect on what worked."
+  },
+  {
+    q: "A manager who is a 'selective delegator' typically:",
+    options: ["Delegates everything including decisions that require their authority", "Delegates routine easy tasks but holds onto anything challenging, high-visibility, or high-stakes", "Never delegates anything to their team", "Delegates randomly without any framework or structure"],
+    correct: 1,
+    feedback: "Selective delegators make real progress but hit a ceiling. They need to push into the harder delegations — the ones that feel risky — to keep growing as leaders."
+  },
+  {
+    q: "When a team member says they feel stretched after taking on new delegated responsibilities, the root cause is most likely:",
+    options: ["They are not capable enough for the work", "Too many responsibilities were added at once without checking their capacity or adjusting other expectations", "Delegation was the wrong approach for this team member", "The manager delegated tasks that should have been kept"],
+    correct: 1,
+    feedback: "Delegation overload happens when responsibilities are added without removing or reducing others. Sequencing and capacity checks prevent this."
+  },
+  {
+    q: "In the context of Jumpin Jellybeans, community partnership outreach has been stalled for weeks. The best approach is:",
+    options: ["Keep handling it yourself since it is too important to delegate", "Develop a capable team member toward it gradually with support, starting with smaller outreach tasks", "Hire someone specifically for this role", "Stop the outreach program until you have more time"],
+    correct: 1,
+    feedback: "Develop toward is the right task type here. Start the team member with simpler outreach, coach them through the first few, and build toward full ownership over time."
+  },
+  {
+    q: "After completing both the original training and this follow-up, the most important ongoing habit is:",
+    options: ["Reviewing the delegation frameworks monthly", "Consistently delegating, following through on check-ins, giving real feedback, and reflecting on what is working", "Keeping a written log of every delegation", "Checking in with your manager weekly about delegation progress"],
+    correct: 1,
+    feedback: "Delegation mastery is built through consistent practice and honest reflection — not periodic review of the frameworks. The habit compounds over time."
+  },
+  {
+    q: "A manager commits to delegating community partnership calls to a team member next week. To make this delegation most likely to succeed they should:",
+    options: ["Simply tell the team member to start making calls", "Brief them using all 5 steps: context, clear outcome, authority level, resources, and check-in plan", "Shadow the team member on every call for the first month", "Wait until the team member asks for the responsibility"],
+    correct: 1,
+    feedback: "The 5-step delegation conversation is the single most important tool for setting a delegation up to succeed. Skipping steps — especially outcome and check-in plan — is where most delegations fail."
+  },
+  {
+    q: "The long-term goal of consistent delegation practice at Jumpin Jellybeans is:",
+    options: ["A manager who never has to do any operational work", "A team that is accountable, capable, and growing — freeing the manager for higher-leverage leadership work", "Reducing the number of staff needed", "Ensuring every task is done exactly the way the manager would do it"],
+    correct: 1,
+    feedback: "Delegation done consistently builds a team that owns their work. Over time the manager shifts from doing and directing to developing and deciding — which is where leadership impact lives."
+  }
+];
+
+// ── STATE ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setNavUser(...ids) {
+  for (let i = 0; i < ids.length; i += 2) {
+    const av = document.getElementById(ids[i]);
+    const nm = document.getElementById(ids[i+1]);
+    if (av) av.textContent = userInitials;
+    if (nm) nm.textContent = userName;
+  }
+}
+
+// ── LOGIN ──
+function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const code = document.getElementById('login-code').value.trim();
+  if (!name) { document.getElementById('login-error').textContent = 'Please enter your name.'; document.getElementById('login-error').classList.remove('hidden'); return; }
+  if (code !== ACCESS_CODE) { document.getElementById('login-error').textContent = 'Incorrect access code. Please try again.'; document.getElementById('login-error').classList.remove('hidden'); return; }
+  userName = name;
+  userInitials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  setNavUser('intro-nav-avatar', 'intro-nav-name');
+  document.getElementById('intro-message').innerHTML = `Welcome back, <strong>${userName.split(' ')[0]}</strong>! It has been a couple of weeks since you completed Delegation Mastery at Jumpin' Jellybeans.<br><br>This session is different. JJ is not here to teach you new material — JJ is here to find out what you actually did with the training, push you with harder real-world scenarios, and help you identify where to go next as a leader.`;
+  showScreen('screen-intro');
+}
+
+document.getElementById('login-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  showScreen('screen-login');
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-code').value = '';
+  document.getElementById('login-error').classList.add('hidden');
+}
+
+// ── INTRO → MODULE ──
+function startModule() {
+  setNavUser('mod-nav-avatar', 'mod-nav-name');
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('quick-replies').innerHTML = '';
+  document.getElementById('quick-replies').classList.add('hidden');
+  document.getElementById('quick-replies-label').classList.add('hidden');
+  document.getElementById('btn-start-quiz').style.display = 'none';
+  document.getElementById('quiz-hint').textContent = 'Work through all 4 phases with JJ to unlock the quiz.';
+  chatHistory = [];
+  showScreen('screen-module');
+  startChat();
+}
+
+async function startChat() {
+  const opening = `Welcome back, ${userName.split(' ')[0]}! It has been a couple of weeks since you completed Delegation Mastery.`;
+  await sendBubbles(opening);
+  chatHistory.push({ role: 'assistant', content: opening });
+  const q = `Before we do anything else — did you actually delegate anything new at Jumpin' Jellybeans since the training? Tell me what happened.`;
+  await new Promise(r => setTimeout(r, 800));
+  showTyping();
+  await new Promise(r => setTimeout(r, 1000));
+  hideTyping();
+  await sendBubbles(q);
+  chatHistory.push({ role: 'assistant', content: q });
+  showQuickReplies();
+}
+
+// ── CHAT ──
+function addMessage(role, text) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const initials = role === 'ai' ? 'J' : userInitials;
+  const avClass = role === 'ai' ? 'ai' : 'user-av';
+  div.innerHTML = `<div class="msg-avatar ${avClass}">${initials}</div><div class="msg-bubble">${text}</div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function sendBubbles(text) {
+  const raw = text.split(/\n\n+|\n(?=[A-Z])/);
+  const bubbles = raw.map(s => s.trim()).filter(s => s.length > 0);
+  for (let i = 0; i < bubbles.length; i++) {
+    if (i > 0) {
+      showTyping();
+      await new Promise(r => setTimeout(r, 500 + Math.min(bubbles[i].length * 10, 1000)));
+      hideTyping();
+    }
+    addMessage('ai', bubbles[i]);
+    await new Promise(r => setTimeout(r, 80));
+  }
+}
+
+function showTyping() {
+  document.getElementById('typing-wrap').classList.remove('hidden');
+  const wrap = document.getElementById('chat-messages');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function hideTyping() { document.getElementById('typing-wrap').classList.add('hidden'); }
+
+async function sendUserMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('quick-replies').classList.add('hidden');
+  document.getElementById('quick-replies-label').classList.add('hidden');
+  addMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  await getAIResponse();
+}
+
+async function getAIResponse() {
+  document.getElementById('btn-send').disabled = true;
+  showTyping();
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT + `\n\nThe manager name is ${userName.split(' ')[0]}.`,
+        messages: chatHistory
+      })
+    });
+    const data = await resp.json();
+    if (data.error) {
+      hideTyping();
+      addMessage('ai', `Error: ${data.error.message}`);
+      document.getElementById('btn-send').disabled = false;
+      return;
+    }
+    const reply = data.content?.[0]?.text || 'I had trouble responding. Please try again.';
+    hideTyping();
+    await sendBubbles(reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+    const lower = reply.toLowerCase();
+    if (lower.includes('take final quiz') || lower.includes('ready for the final') || (lower.includes('click') && lower.includes('quiz'))) {
+      document.getElementById('btn-start-quiz').style.display = 'inline-block';
+      document.getElementById('quiz-hint').textContent = 'Great work — you are ready for the final quiz!';
+    }
+    updatePhaseBar(lower);
+    showQuickReplies();
+  } catch(e) {
+    hideTyping();
+    addMessage('ai', 'Connection issue. Please check your internet and try again.');
+  }
+  document.getElementById('btn-send').disabled = false;
+}
+
+function updatePhaseBar(lower) {
+  const bars = document.querySelectorAll('.phase-step');
+  if (!bars.length) return;
+  let phase = 0;
+  if (lower.includes('scenario') || lower.includes('saturday') || lower.includes('avery') || lower.includes('casey')) phase = 1;
+  if (lower.includes('assessment') || lower.includes('scale of 1') || lower.includes('six roadblocks') || lower.includes('holding you back from being')) phase = 2;
+  if (lower.includes('commitment') || lower.includes('committing to') || lower.includes('next 7 days') || lower.includes('one specific delegation')) phase = 3;
+  bars.forEach((b, i) => {
+    b.style.background = i === phase ? 'var(--accent)' : 'var(--bg)';
+    b.style.color = i === phase ? '#fff' : 'var(--text-muted)';
+    b.style.border = i === phase ? 'none' : '1px solid var(--border)';
+  });
+}
+
+function showQuickReplies() {
+  const replies = [
+    "Yes I delegated something new",
+    "I tried but ran into some challenges",
+    "I have not had a chance to delegate yet"
+  ];
+  const qr = document.getElementById('quick-replies');
+  qr.innerHTML = '';
+  replies.forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = label;
+    btn.onclick = () => {
+      document.getElementById('chat-input').value = label;
+      sendUserMessage();
+    };
+    qr.appendChild(btn);
+  });
+  qr.classList.remove('hidden');
+  document.getElementById('quick-replies-label').classList.remove('hidden');
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── QUIZ ──
+function startQuiz() {
+  setNavUser('quiz-nav-avatar', 'quiz-nav-name');
+  quizCurrent = 0;
+  quizScore = 0;
+  renderQuestion();
+  showScreen('screen-quiz');
+}
+
+function renderQuestion() {
+  if (quizCurrent >= QUIZ_QUESTIONS.length) { showComplete(); return; }
+  const q = QUIZ_QUESTIONS[quizCurrent];
+  document.getElementById('quiz-body').innerHTML = `
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:1.5rem">Question ${quizCurrent+1} of ${QUIZ_QUESTIONS.length}</div>
+    <div class="question-card">
+      <div class="question-text">${q.q}</div>
+      ${q.options.map((opt,i) => `<button class="option-btn" id="opt-${i}" onclick="selectAnswer(${i})">${opt}</button>`).join('')}
+      <div id="feedback-box" class="hidden"></div>
+    </div>
+    <div id="next-wrap" class="hidden">
+      <button class="btn-next" onclick="nextQuestion()">${quizCurrent < QUIZ_QUESTIONS.length-1 ? 'Next Question →' : 'See Results'}</button>
+    </div>`;
+}
+
+function selectAnswer(idx) {
+  const q = QUIZ_QUESTIONS[quizCurrent];
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback-box');
+  if (idx === q.correct) {
+    document.getElementById('opt-'+idx).classList.add('correct');
+    fb.className = 'feedback-box right';
+    fb.textContent = '✓ Correct — ' + q.feedback;
+    quizScore++;
+  } else {
+    document.getElementById('opt-'+idx).classList.add('wrong');
+    document.getElementById('opt-'+q.correct).classList.add('reveal-correct');
+    fb.className = 'feedback-box wrong';
+    fb.textContent = '✗ Not quite — ' + q.feedback;
+  }
+  fb.classList.remove('hidden');
+  document.getElementById('next-wrap').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  quizCurrent++;
+  renderQuestion();
+}
+
+// ── COMPLETE ──
+function showComplete() {
+  const total = QUIZ_QUESTIONS.length;
+  const pct = Math.round(quizScore / total * 100);
+  const grade = pct >= 90 ? 'Excellent' : pct >= 80 ? 'Strong' : pct >= 70 ? 'Good' : pct >= 60 ? 'Satisfactory' : 'Needs Review';
+  const gradeColor = pct >= 80 ? 'var(--accent)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+
+  document.getElementById('score-summary').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:13px;color:var(--text);">Delegation in Action — Final Quiz</div>
+      <div style="font-size:13px;font-weight:500;color:${gradeColor};">${quizScore}/${total} (${pct}%)</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;">
+      <div style="font-size:15px;font-weight:500;">Overall Score</div>
+      <div style="font-size:18px;font-weight:500;color:${gradeColor};">${grade}</div>
+    </div>`;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const copyStr = `DELEGATION IN ACTION — COMPLETION REPORT
+Jumpin' Jellybeans Follow-Up Training
+====================================
+Name: ${userName}
+Date Completed: ${dateStr}
+Quiz Score: ${quizScore}/${total} (${pct}%) — ${grade}
+
+====================================
+This report was generated by the Jumpin' Jellybeans
+Delegation in Action follow-up training program.`;
+
+  document.getElementById('copy-text').textContent = copyStr;
+  showScreen('screen-complete');
+}
+
+function copyResults() {
+  const text = document.getElementById('copy-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'var(--accent-mid)';
+    setTimeout(() => { btn.textContent = 'Copy Results to Clipboard'; btn.style.background = ''; }, 2500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = 'Copy Results to Clipboard'; }, 2500);
+  });
+}
+</script>
+</body>
+</html>

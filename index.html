@@ -249,34 +249,8 @@ function renderDashboard() {
       <span class="card-badge ${delegationDone ? 'badge-done' : 'badge-available'}">${delegationDone ? 'Complete' : 'Available'}</span>
     </div>`;
 
-  // Follow-up card
-  let followupCard = '';
-  if (!delegationDone) {
-    followupCard = `
-    <div class="training-card locked">
-      <div class="card-icon muted">🎯</div>
-      <div class="card-body">
-        <div class="card-title">Delegation in Action</div>
-        <div class="card-meta">Follow-Up Training · ~35–40 min</div>
-        <div class="card-desc">Real accountability check on delegations you made, advanced scenarios, delegation style assessment, and commitment to your next step.</div>
-        <div class="lock-reason">🔒 Complete Delegation Mastery first</div>
-      </div>
-      <span class="card-badge badge-locked">Locked</span>
-    </div>`;
-  } else if (!followupUnlocked) {
-    followupCard = `
-    <div class="training-card locked">
-      <div class="card-icon muted">🎯</div>
-      <div class="card-body">
-        <div class="card-title">Delegation in Action</div>
-        <div class="card-meta">Follow-Up Training · ~35–40 min</div>
-        <div class="card-desc">Real accountability check on delegations you made, advanced scenarios, delegation style assessment, and commitment to your next step.</div>
-        <div class="lock-reason">⏳ Unlocks in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} — give your delegation skills time to develop in the real world first</div>
-      </div>
-      <span class="card-badge badge-locked">${daysRemaining}d remaining</span>
-    </div>`;
-  } else {
-    followupCard = `
+  // Follow-up card — always unlocked
+  let followupCard = `
     <div class="training-card ${followupDone ? 'completed' : 'clickable'}" onclick="goTo('${FOLLOWUP_URL}')">
       <div class="card-icon ${followupDone ? 'green' : 'amber'}">${followupDone ? '✓' : '🎯'}</div>
       <div class="card-body">
@@ -284,9 +258,8 @@ function renderDashboard() {
         <div class="card-meta">Follow-Up Training · ~35–40 min</div>
         <div class="card-desc">Real accountability check on delegations you made, advanced scenarios, delegation style assessment, and commitment to your next step.</div>
       </div>
-      <span class="card-badge ${followupDone ? 'badge-done' : 'badge-available'}">${followupDone ? 'Complete' : 'Unlocked'}</span>
+      <span class="card-badge ${followupDone ? 'badge-done' : 'badge-available'}">${followupDone ? 'Complete' : 'Available'}</span>
     </div>`;
-  }
   document.getElementById('card-followup').innerHTML = followupCard;
 
   // Bias card
